@@ -269,7 +269,7 @@
               z && h('label', null, 'Korte omschrijving (optioneel)', h('textarea', { name: 'bio', maxlength: '600', style: 'min-height:80px' })),
               z && badgeBoxes(),
               z && h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'zicht', required: 'required' }), 'Ik begrijp dat mijn profiel (bedrijfsnaam, vakgebied, regio, tarief, KvK) zichtbaar is in het ZZP-overzicht.'),
-              h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'ok', required: 'required' }), h('span', null, 'Ik ga akkoord met de ', h('a', { href: 'voorwaarden.html', target: '_blank', rel: 'noopener', text: 'voorwaarden en privacyverklaring' }), '.')),
+              h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'ok', required: 'required' }), h('span', null, 'Ik ga akkoord met de ', h('a', { href: 'voorwaarden.html', target: '_blank', rel: 'noopener', text: 'algemene voorwaarden' }), ' en de ', h('a', { href: 'privacy.html', target: '_blank', rel: 'noopener', text: 'privacyverklaring' }), '.')),
               er, oke, h('button', { class: 'btn pill', type: 'submit', text: 'Account aanmaken' }));
             f.addEventListener('submit', function (e) {
               e.preventDefault(); er.textContent = ''; var q = f.elements; q.kvk_number.value = q.kvk_number.value.replace(/\s+/g, '');

@@ -60,7 +60,7 @@
       h('p', { text: D.dba ? 'De opdrachtgever heeft bevestigd de Wet DBA-controle te hebben gelezen en dat de opdracht naar beste weten geen verkapt dienstverband is.' : 'De Wet DBA-controle is nog niet bevestigd.' }),
       h('p', { class: 'hint', text: 'Dit document is geen juridisch advies. Raadpleeg bij twijfel de Belastingdienst. Op het gebruik van ATAS ZZP Netwerk zijn de algemene voorwaarden en de privacyverklaring van toepassing.' })));
     doc.appendChild(h('div', { class: 'wp-sign' }, h('div', null, 'Opdrachtgever, datum en handtekening'), h('div', null, 'ZZP\'er, datum en handtekening')));
-    doc.appendChild(h('p', { class: 'wp-foot', text: 'ATAS ZZP Netwerk · Atas Group · Emmen, Nederland · actief in heel Nederland · sales@atasgroup.nl' }));
+    doc.appendChild(h('p', { class: 'wp-foot', text: 'ATAS ZZP Netwerk · Atas Group · Emmen, Nederland · actief in heel Nederland · info@atasgroup.nl' }));
   }).catch(function () { fail('Het werkplan kon niet worden geladen.'); });
   $('wp-print').addEventListener('click', function () { window.print(); });
 })();

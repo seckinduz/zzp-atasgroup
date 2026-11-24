@@ -93,7 +93,7 @@ PAGE = """<!doctype html>
 <dl><dt>Opdrachtgever</dt><dd>{bedrijf}</dd><dt>KvK-nummer</dt><dd>{kvk}</dd><dt>Categorie</dt><dd>{categorie}</dd><dt>Soort klus</dt><dd>{subklus}</dd><dt>Regio</dt><dd>{regio}</dd><dt>Omvang en duur</dt><dd>{duur}</dd><dt>Tarief</dt><dd>{tarief}</dd></dl>
 <div class="desc">{desc}</div>
 <p style="margin-top:18px"><a class="btn pill" href="../ilan.html?id={id}">Reageer op deze klus</a></p></div></div></main>
-<footer class="site"><div class="wrap"><p>ATAS ZZP Netwerk · Onderdeel van <a href="https://atasgroup.nl">Atas Group</a> · Emmen, Nederland</p></div></footer></body></html>
+<footer class="site"><div class="wrap"><nav class="fnav"><a href="../voorwaarden.html">Algemene voorwaarden</a><a href="../privacy.html">Privacy (AVG)</a></nav><p>ATAS ZZP Netwerk · <a href="https://atasgroup.nl">Atas Group</a> · Emmen, Nederland · <a href="mailto:info@atasgroup.nl">info@atasgroup.nl</a></p></div></footer></body></html>
 """
 
 if __name__ == "__main__":
@@ -113,7 +113,7 @@ if __name__ == "__main__":
             url=f"{SITE}/ilan/{j['id']}.html", beschr=html.escape(samenvatting(j)[:150]), desc="".join(f"<p>{html.escape(x)}</p>" for x in paras(j["description"])),
             ld=json.dumps(jobposting(j), ensure_ascii=False).replace("<", "\\u003c")), encoding="utf-8")
     vandaag = date.today().isoformat()
-    urls = [(f"{SITE}/", vandaag, "1.0"), (f"{SITE}/plaatsen.html", vandaag, "0.9"), (f"{SITE}/werkwijze.html", vandaag, "0.7"), (f"{SITE}/wet-dba-kvk.html", vandaag, "0.7"), (f"{SITE}/voorwaarden.html", vandaag, "0.4")] + \
+    urls = [(f"{SITE}/", vandaag, "1.0"), (f"{SITE}/plaatsen.html", vandaag, "0.9"), (f"{SITE}/werkwijze.html", vandaag, "0.7"), (f"{SITE}/wet-dba-kvk.html", vandaag, "0.7"), (f"{SITE}/voorwaarden.html", vandaag, "0.4"), (f"{SITE}/privacy.html", vandaag, "0.4")] + \
            [(f"{SITE}/regios.html", vandaag, "0.8")] + [(f"{SITE}/{p.name}", vandaag, "0.8") for p in sorted(HERE.glob("zzp-*.html"))] +            [(f"{SITE}/ilan/{j['id']}.html", str(j.get("created_at") or vandaag)[:10], "0.8") for j in lijst]
     (HERE / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
         "".join(f"  <url><loc>{u}</loc><lastmod>{m}</lastmod><priority>{p}</priority></url>\n" for u, m, p in urls) + "</urlset>\n", encoding="utf-8")

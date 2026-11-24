@@ -218,8 +218,8 @@ HEAD = """<!doctype html>
 """
 FOOT = """</div></main>
 <footer class="site"><div class="wrap"><img class="flogo" src="logo-zzp.svg?v={v}" alt="ATAS ZZP" width="150" height="30">
-<nav class="fnav" aria-label="Informatie"><a href="werkwijze.html">Hoe het werkt</a><a href="regios.html">Werkgebied</a><a href="wet-dba-kvk.html">Wet DBA &amp; KvK Zekerheid</a><a href="voorwaarden.html">Voorwaarden &amp; Privacy</a><a href="plaatsen.html">Klus plaatsen</a></nav>
-<p>ATAS ZZP Netwerk · Onderdeel van <a href="https://atasgroup.nl">Atas Group</a> · Emmen, Nederland · Actief in heel Nederland · <a href="mailto:sales@atasgroup.nl">sales@atasgroup.nl</a></p></div></footer>
+<nav class="fnav" aria-label="Informatie"><a href="werkwijze.html">Hoe het werkt</a><a href="regios.html">Werkgebied</a><a href="wet-dba-kvk.html">Wet DBA &amp; KvK Zekerheid</a><a href="voorwaarden.html">Algemene voorwaarden</a><a href="privacy.html">Privacy (AVG)</a><a href="plaatsen.html">Klus plaatsen</a></nav>
+<p>ATAS ZZP Netwerk · <a href="https://atasgroup.nl">Atas Group</a> · Emmen, Nederland · <a href="mailto:info@atasgroup.nl">info@atasgroup.nl</a></p></div></footer>
 <script src="config.js"></script><script src="db.js?v={v}"></script><script src="geo.js?v={v}"></script><script src="app.js?v={v}"></script></body></html>
 """
 
@@ -227,7 +227,7 @@ def ld_graph(url, naam, beschr, crumbs, faq, area=None, service=None):
     g = [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": i + 1, "name": n, "item": SITE + "/" + (u if u else "")} for i, (n, u) in enumerate(crumbs)]}]
     if service:
         g.append({"@type": "Service", "name": naam, "description": beschr, "serviceType": service, "url": url, "areaServed": {"@type": "AdministrativeArea", "name": area},
-                  "provider": {"@type": "Organization", "name": "ATAS ZZP Netwerk", "url": SITE + "/", "email": "sales@atasgroup.nl", "address": {"@type": "PostalAddress", "addressLocality": "Emmen", "addressRegion": "Drenthe", "addressCountry": "NL"}}})
+                  "provider": {"@type": "Organization", "name": "ATAS ZZP Netwerk", "url": SITE + "/", "email": "info@atasgroup.nl", "address": {"@type": "PostalAddress", "addressLocality": "Emmen", "addressRegion": "Drenthe", "addressCountry": "NL"}}})
     g.append({"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]})
     return json.dumps({"@context": "https://schema.org", "@graph": g}, ensure_ascii=False).replace("<", "\\u003c")
 
