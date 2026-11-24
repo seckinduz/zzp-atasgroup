@@ -80,6 +80,42 @@
   var page = document.body.getAttribute('data-page');
   var matchRegio = function (sel, r) { return !sel || r === sel || r === REMOTE_REGIO; };
 
+  var PLAATS = [[/emmen|klazienaveen|erica|coevorden|assen|hoogeveen|meppel|drenthe/, 'Drenthe (Emmen)'], [/groningen|hoogezand|veendam|stadskanaal|delfzijl/, 'Groningen'], [/leeuwarden|sneek|heerenveen|drachten|friesland/, 'Friesland'], [/zwolle|deventer|enschede|almelo|hengelo|kampen|hardenberg|overijssel/, 'Overijssel'], [/almere|lelystad|dronten|emmeloord|flevoland/, 'Flevoland'], [/arnhem|nijmegen|apeldoorn|ede\b|doetinchem|gelderland/, 'Gelderland'], [/utrecht|amersfoort|nieuwegein|veenendaal|zeist/, 'Utrecht'], [/amsterdam|haarlem|alkmaar|zaandam|hilversum|noord-holland/, 'Noord-Holland'], [/rotterdam|den haag|leiden|dordrecht|delft|gouda|zoetermeer|zuid-holland/, 'Zuid-Holland'], [/middelburg|vlissingen|goes\b|terneuzen|zeeland/, 'Zeeland'], [/eindhoven|tilburg|breda|den bosch|hertogenbosch|helmond|brabant/, 'Noord-Brabant'], [/maastricht|heerlen|venlo|sittard|roermond|limburg/, 'Limburg']];
+  var PC = [[1000, 1299, 'Noord-Holland'], [1300, 1369, 'Flevoland'], [1370, 2199, 'Noord-Holland'], [2200, 3399, 'Zuid-Holland'], [3400, 3999, 'Utrecht'], [4000, 4199, 'Gelderland'], [4200, 4299, 'Zuid-Holland'], [4300, 4599, 'Zeeland'], [4600, 5799, 'Noord-Brabant'], [5800, 6499, 'Limburg'], [6500, 7399, 'Gelderland'], [7400, 7799, 'Overijssel'], [7800, 7999, 'Drenthe (Emmen)'], [8000, 8199, 'Overijssel'], [8200, 8399, 'Flevoland'], [8400, 9299, 'Friesland'], [9300, 9499, 'Drenthe (Emmen)'], [9500, 9999, 'Groningen']];
+  function regioVan(t) {
+    t = String(t || '').toLowerCase(); var m = /(\d{4})/.exec(t), i, n;
+    for (i = 0; i < PLAATS.length; i++) if (PLAATS[i][0].test(t)) return PLAATS[i][1];
+    if (m) { n = +m[1]; for (i = 0; i < PC.length; i++) if (n >= PC[i][0] && n <= PC[i][1]) return PC[i][2]; }
+    return '';
+  }
+
+  /* ---------------- vitrine: echte klussen en leden eerst, daarna duidelijk gelabelde voorbeelden ---------------- */
+  var VK = [
+    { t: 'Badkamer verbouwen en tegelen', c: 'Bouw, Techniek & Installatie', s: 'Loodgieter', r: 'Drenthe (Emmen)', p: 'Emmen', d: '12 m²', rate: 'Richtprijs € 4.800 excl. btw' },
+    { t: 'Kantoorruimte schilderen, 320 m²', c: 'Bouw, Techniek & Installatie', s: 'Schilder', r: 'Groningen', p: 'Groningen', d: '3 weken', rate: 'Richtprijs € 3.600 excl. btw' },
+    { t: 'Chauffeur CE voor regioritten', c: 'Logistiek, Transport & Magazijn', s: 'Vrachtwagenchauffeur', r: 'Overijssel', p: 'Zwolle', d: '3 dagen per week', rate: '€ 38 per uur excl. btw' },
+    { t: 'Webshop koppelen met boekhoudpakket', c: 'IT, Software & AI', s: 'Webontwikkeling', r: 'Noord-Holland', p: 'Amsterdam', d: 'ca. 40 uur', rate: '€ 85 per uur excl. btw' },
+    { t: 'Groepenkast vervangen en elektra nalopen', c: 'Bouw, Techniek & Installatie', s: 'Elektricien', r: 'Zuid-Holland', p: 'Rotterdam', d: '2 dagen', rate: '€ 62 per uur excl. btw' },
+    { t: 'Dakisolatie rijtjeswoning, 70 m²', c: 'Dak & Isolatie', s: 'Dakisolatie', r: 'Utrecht', p: 'Utrecht', d: '70 m²', rate: 'Richtprijs € 3.900 excl. btw' }];
+  var VZ = [
+    { n: 'Jansen Elektrotechniek', c: 'Bouw, Techniek & Installatie', p: 'Emmen', rate: '€ 62 / uur excl. btw', b: ['VCA', 'AVB'], bio: 'Woningen en bedrijfspanden in Zuidoost-Drenthe, van groepenkast tot laadpaal.' },
+    { n: 'Van der Meer Schilderwerken', c: 'Bouw, Techniek & Installatie', p: 'Groningen', rate: '€ 46 / uur excl. btw', b: ['AVB', 'Wet DBA'], bio: 'Binnen- en buitenschilderwerk, spuitwerk en stucwerk voor particulier en zakelijk.' },
+    { n: 'Bakker Transport & Logistiek', c: 'Logistiek, Transport & Magazijn', p: 'Zwolle', rate: '€ 39 / uur excl. btw', b: ['VCA', 'AVB'], bio: 'Chauffeur CE met eigen bedrijfswagen voor regioritten en piekdrukte.' },
+    { n: 'Studio Verhoeven', c: 'IT, Software & AI', p: 'Amsterdam', rate: '€ 88 / uur excl. btw', b: ['AVB', 'Wet DBA'], bio: 'Webshops, koppelingen en automatisering voor mkb, met Modelovereenkomst.' },
+    { n: 'De Vries Installatiewerk', c: 'Bouw, Techniek & Installatie', p: 'Rotterdam', rate: '€ 65 / uur excl. btw', b: ['VCA', 'AVB'], bio: 'Loodgieterswerk, cv-onderhoud en badkamerinstallaties in de regio Rijnmond.' },
+    { n: 'Smit Groen & Straatwerk', c: 'Tuin & Bestrating', p: 'Utrecht', rate: '€ 48 / uur excl. btw', b: ['AVB'], bio: 'Tuinaanleg, bestrating en onderhoud voor particulieren en VvE\'s.' }];
+  function vitrine() {
+    var vk = $('vit-klussen'), vz = $('vit-zzp'); if (!vk || !vz) return;
+    var chip = function (tx, cls) { return h('span', { class: 'chip' + (cls ? ' ' + cls : ''), text: tx }); };
+    Promise.all([Z.listJobs().catch(function () { return []; }), Z.listZzps().catch(function () { return []; })]).then(function (r) {
+      var jobs = r[0].slice(0, 6), zz = r[1].slice(0, 6);
+      jobs.forEach(function (x) { vk.appendChild(h('a', { class: 'job', href: 'ilan.html?id=' + encodeURIComponent(x.id) }, h('div', { class: 'jt' }, h('h3', { text: x.title }), badge(x.profiles)), h('div', { class: 'chips' }, chip(x.category), x.subcategory && chip(x.subcategory)), h('span', { class: 'meta', text: [naam(x.profiles), x.region, x.duration].filter(Boolean).join(' · ') }), h('span', { class: 'rate', text: rateTxt(x) }))); });
+      VK.slice(0, Math.max(0, 6 - jobs.length)).forEach(function (x) { vk.appendChild(h('article', { class: 'job ex' }, h('div', { class: 'jt' }, h('h3', { text: x.t }), chip('Voorbeeld', 'ex')), h('div', { class: 'chips' }, chip(x.c), chip(x.s)), h('span', { class: 'meta', text: x.p + ' · ' + x.r + ' · ' + x.d }), h('span', { class: 'rate', text: x.rate }), h('a', { class: 'mini', href: 'plaatsen.html', text: 'Plaats een vergelijkbare klus' }))); });
+      zz.forEach(function (x) { vz.appendChild(h('article', { class: 'job' }, h('div', { class: 'jt' }, h('h3', { text: naam(x) }), badge(x)), h('span', { class: 'meta', text: [x.category, x.region].filter(Boolean).join(' · ') }), x.hourly_rate != null && h('span', { class: 'rate', text: eur(x.hourly_rate) + ' / uur excl. btw' }), trust(x))); });
+      VZ.slice(0, Math.max(0, 6 - zz.length)).forEach(function (x) { vz.appendChild(h('article', { class: 'job ex' }, h('div', { class: 'jt' }, h('h3', { text: x.n }), chip('Voorbeeld', 'ex')), h('span', { class: 'meta', text: x.c + ' · ' + x.p }), h('span', { class: 'rate', text: x.rate }), h('span', { class: 'meta', text: x.bio }), h('div', { class: 'trustrow' }, h('span', { class: 'tchip v' }, h('span', { class: 'coin', text: '✓' }), 'KvK'), x.b.map(function (k) { return h('span', { class: 'tchip v' }, h('span', { class: 'coin', text: '✓' }), k); })))); });
+    });
+  }
+
   /* ---------------- HOME ---------------- */
   function home() {
     var mode = 'opdracht', data = { opdracht: null, zzp: null }, uit = $('uitslag'), tel = $('telling');
@@ -89,6 +125,11 @@
       var rc = $('regio'); rc.textContent = ''; W.regios.forEach(function (r) { rc.appendChild(h('button', { type: 'button', class: 'rchip', 'aria-pressed': 'false', text: r, onclick: function () { $('f-regio').value = r; sync(); render(); } })); });
       function sync() { Array.prototype.forEach.call(rc.children, function (b) { b.setAttribute('aria-pressed', b.textContent === $('f-regio').value); }); }
       $('f-regio').addEventListener('input', sync);
+      var qp = new URLSearchParams(location.search), qr = qp.get('regio'), qc = qp.get('cat');
+      if (qr && W.regios.indexOf(qr) >= 0) $('f-regio').value = qr;
+      W.categorieen.forEach(function (c) { if (qc && (c.id === qc || c.naam === qc)) $('f-cat').value = c.naam; });
+      if (qp.get('q')) $('f-q').value = qp.get('q');
+      sync(); render();
     });
     function zet(m) {
       mode = m; $('p-zoek').setAttribute('aria-pressed', m === 'zzp'); $('p-ben').setAttribute('aria-pressed', m === 'opdracht');
@@ -128,7 +169,12 @@
     $('p-ben').addEventListener('click', function () { zet('opdracht'); });
     ['f-cat', 'f-regio', 'f-spoed'].forEach(function (i) { $(i).addEventListener('input', render); });
     $('f-q').addEventListener('input', render); $('zoekform').addEventListener('submit', function (e) { e.preventDefault(); });
-    zet('opdracht'); calculator();
+    var sbar = $('sbar');
+    if (sbar) sbar.addEventListener('submit', function (e) {
+      e.preventDefault(); $('f-q').value = $('s-q').value.trim(); $('f-regio').value = regioVan($('s-plaats').value); $('f-regio').dispatchEvent(new Event('input')); render();
+      $('resultaten').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    zet('opdracht'); calculator(); vitrine();
   }
 
   /* ---------------- ZZP Uurtarief Calculator ---------------- */

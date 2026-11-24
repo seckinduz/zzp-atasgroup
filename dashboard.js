@@ -11,6 +11,8 @@
   var schip = function (s) { var x = STATUS[s] || [s || '—', '']; return h('span', { class: 'schip ' + x[1], text: x[0] }); };
   var sel = function (name, val, lijst, leeg) { var s = h('select', { name: name }); s.appendChild(h('option', { value: '', text: leeg })); lijst.forEach(function (c) { s.appendChild(h('option', { value: c, text: c })); }); s.value = val || ''; return s; };
   var veld = function (lbl, name, attrs) { return h('label', null, lbl, h('input', Object.assign({ name: name }, attrs || {}))); };
+  var telVan = function (a) { var m = /Tel:\s*([+0-9][0-9 ()-]{7,})/.exec(a.message || ''); if (!m) return ''; var n = m[1].replace(/[^0-9+]/g, '').replace(/^\+/, '').replace(/^00/, ''); return /^0/.test(n) ? '31' + n.slice(1) : n; };
+  var waLink = function (a, j, pr) { var t = 'Hallo ' + (pr.full_name || '') + ', bedankt voor uw bod' + (a.proposed_rate != null ? ' van ' + eur(a.proposed_rate) : '') + ' op "' + j.title + '". Ik heb uw aanmelding geaccepteerd via ATAS ZZP. Wanneer kunnen we de details bespreken?'; return 'https://wa.me/' + telVan(a) + '?text=' + encodeURIComponent(t); };
   var contactMail = function (a) { var m = /Contact:\s*([^\s]+@[^\s]+)/.exec(a.message || ''); return m ? m[1] : ''; };
   var tab0 = (new URLSearchParams(location.search).get('tab') || 'overzicht').toLowerCase();
   if (['zzp', 'opdrachtgever'].indexOf(tab0) >= 0) tab0 = 'overzicht';
@@ -34,9 +36,14 @@
       nav.appendChild(h('button', { type: 'button', role: 'tab', class: 'dtab', 'data-t': t[0], 'aria-selected': st.tab === t[0], text: t[1], onclick: function () { show(t[0]); } }));
     });
     root.appendChild(h('div', { class: 'dash' }, nav, main));
+    var ic = function (p) { var s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('fill', 'none'); s.setAttribute('stroke', 'currentColor'); s.setAttribute('stroke-width', '1.8'); s.setAttribute('stroke-linecap', 'round'); s.setAttribute('stroke-linejoin', 'round'); s.setAttribute('aria-hidden', 'true'); var q = document.createElementNS('http://www.w3.org/2000/svg', 'path'); q.setAttribute('d', p); s.appendChild(q); return s; };
+    var qb = h('nav', { class: 'qbar', 'aria-label': 'Snelle acties' });
+    [['overzicht', 'Overzicht', 'M3 11l9-7 9 7M5 10v10h14V10'], ['klussen', 'Klussen', 'M4 6h16M4 12h16M4 18h10'], ['tools', 'Tools', 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z'], ['profiel', 'Profiel', 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0']].forEach(function (x) { qb.appendChild(h('button', { type: 'button', 'data-q': x[0], 'aria-current': st.tab === x[0], onclick: function () { show(x[0]); } }, ic(x[2]), x[1])); });
+    qb.insertBefore(h('a', { href: 'plaatsen.html' }, ic('M12 5v14M5 12h14'), 'Nieuwe klus'), qb.children[2]); qb.removeChild(qb.children[3]);
+    document.body.appendChild(qb);
     function show(t) {
       st.tab = t; try { history.replaceState(null, '', 'dashboard.html?tab=' + t); } catch (e) { }
-      Array.prototype.forEach.call(nav.children, function (b) { b.setAttribute('aria-selected', b.getAttribute('data-t') === t); });
+      Array.prototype.forEach.call(nav.children, function (b) { b.setAttribute('aria-selected', b.getAttribute('data-t') === t); }); Array.prototype.forEach.call(document.querySelectorAll('.qbar [data-q]'), function (b) { b.setAttribute('aria-current', b.getAttribute('data-q') === t); });
       main.textContent = ''; ({ overzicht: overzicht, profiel: profiel, klussen: klussen, tools: tools })[t](st, main, show);
       if (window.scrollY > 200) window.scrollTo({ top: 0, behavior: 'auto' });
     }
@@ -140,7 +147,7 @@
           acc.addEventListener('click', function () { acc.disabled = true; Z.updateApplication(x.id, { status: 'accepted' }).then(function () { toonAanm(j, ex); }).catch(function (e) { acc.disabled = false; er.textContent = e.message; }); });
           ex.appendChild(h('div', { class: 'app' }, h('div', { class: 'jt' }, h('b', { text: (pr.full_name || '') + ' · ' + (pr.company_name || '') }), schip(x.status || 'pending')), h('div', { class: 'trustrow' }, badge(pr), trust(pr)),
             h('span', { class: 'rate', text: x.proposed_rate != null ? 'Bod: ' + eur(x.proposed_rate) : 'Geen bedrag opgegeven' }), h('span', { class: 'meta', text: 'KvK ' + (pr.kvk_number || '') + ' · ' + datum(x.created_at) }), h('p', { class: 'bericht', text: x.message }),
-            h('div', { class: 'cta' }, acc, mail ? h('a', { class: 'btn ghost', href: 'mailto:' + mail + '?subject=' + encodeURIComponent('Uw reactie op: ' + j.title), text: 'Contact opnemen' }) : h('span', { class: 'hint', text: 'Geen e-mailadres opgegeven' })), er));
+            h('div', { class: 'cta' }, acc, x.status === 'accepted' ? h('a', { class: 'btn wa', href: waLink(x, j, pr), target: '_blank', rel: 'noopener', text: 'Contact via WhatsApp' }) : null, mail ? h('a', { class: 'btn ghost', href: 'mailto:' + mail + '?subject=' + encodeURIComponent('Uw reactie op: ' + j.title), text: 'Contact opnemen' }) : h('span', { class: 'hint', text: 'Geen e-mailadres opgegeven' })), er));
         });
       }).catch(function (e) { ex.appendChild(msg('err', e.message)); });
     }
@@ -164,13 +171,13 @@
     function bodCard(j, app) {
       var box = h('div', { class: 'job' }), form = h('form', { class: 'app', hidden: 'hidden', novalidate: 'novalidate' }), er = msg('err');
       var typ = h('select', { name: 'typ' }, h('option', { value: 'totaalbod', text: 'Totaalbod' }), h('option', { value: 'uurtarief', text: 'Uurtarief' }));
-      form.appendChild(h('div', { class: 'row2' }, h('label', null, 'Soort bod', typ), veld('Bedrag (€ excl. btw)', 'bedrag', { type: 'number', min: '0', step: '5', inputmode: 'numeric', value: p.hourly_rate != null && j.rate_type === 'uur' ? p.hourly_rate : '' })));
+      form.appendChild(h('div', { class: 'row2' }, h('label', null, 'Soort bod', typ), veld('Telefoon of WhatsApp (optioneel)', 'tel', { type: 'tel', autocomplete: 'tel', placeholder: '06 12345678' }), veld('Bedrag (€ excl. btw)', 'bedrag', { type: 'number', min: '0', step: '5', inputmode: 'numeric', value: p.hourly_rate != null && j.rate_type === 'uur' ? p.hourly_rate : '' })));
       form.appendChild(h('label', null, 'Bericht', h('textarea', { name: 'bericht', maxlength: '1500', text: 'Beste ' + naam(j.profiles) + ',\n\nIk reageer graag op uw klus "' + j.title + '". Mijn KvK-nummer is ' + p.kvk_number + '.\n\nMet vriendelijke groet,\n' + p.full_name })));
       form.appendChild(er); form.appendChild(h('button', { class: 'btn pill', type: 'submit', text: 'Verstuur bod' }));
       form.addEventListener('submit', function (e) {
         e.preventDefault(); er.textContent = ''; var q = form.elements; if (q.bericht.value.trim().length < 5) { er.textContent = 'Schrijf een kort bericht.'; return; }
         var b = form.querySelector('button'); b.disabled = true;
-        Z.apply(j.id, { message: q.bericht.value.trim() + (q.bedrag.value ? '\n\nBod: ' + eur(Number(q.bedrag.value)) + ' (' + q.typ.value + ')' : ''), proposed_rate: q.bedrag.value, email: st.email }).then(laad).catch(function (x) { er.textContent = x.message; b.disabled = false; });
+        Z.apply(j.id, { message: q.bericht.value.trim() + (q.bedrag.value ? '\n\nBod: ' + eur(Number(q.bedrag.value)) + ' (' + q.typ.value + ')' : '') + (q.tel.value.trim() ? '\n\nTel: ' + q.tel.value.trim() : ''), proposed_rate: q.bedrag.value, email: st.email }).then(laad).catch(function (x) { er.textContent = x.message; b.disabled = false; });
       });
       var toggle = app ? h('span', { class: 'okmsg', text: 'Gereageerd ✓ · ' + (STATUS[app.status || 'pending'] || [app.status])[0] }) : h('button', { class: 'btn pill', type: 'button', text: 'Bod uitbrengen', onclick: function () { form.hidden = !form.hidden; } });
       box.appendChild(h('div', { class: 'jt' }, h('h3', { text: j.title }), badge(j.profiles))); box.appendChild(h('span', { class: 'meta', text: [naam(j.profiles), j.category, j.subcategory, j.duration].filter(Boolean).join(' · ') }));

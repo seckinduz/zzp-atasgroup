@@ -84,10 +84,10 @@ PAGE = """<!doctype html>
 <meta name="description" content="{beschr}">
 <link rel="canonical" href="{url}"><link rel="icon" type="image/svg+xml" href="../favicon.svg"><meta name="robots" content="index, follow"><meta name="theme-color" content="#ffffff">
 <meta property="og:type" content="article"><meta property="og:locale" content="nl_NL"><meta property="og:title" content="{titel} in {regio}"><meta property="og:url" content="{url}">
-<link rel="stylesheet" href="../style.css?v=11"><link rel="stylesheet" href="../zzp.css?v=11">
+<link rel="stylesheet" href="../style.css?v=12"><link rel="stylesheet" href="../zzp.css?v=12">
 <script type="application/ld+json">{ld}</script></head>
 <body><div class="glow" aria-hidden="true"><i></i><i></i><i></i></div>
-<header class="site"><div class="wrap hz"><a class="logo" href="../index.html"><img src="../logo-zzp.svg?v=11" alt="ATAS ZZP" width="190" height="34"></a><nav class="hnav"><a class="btn pill" href="../plaatsen.html">Klus plaatsen</a></nav></div></header>
+<header class="site"><div class="wrap hz"><a class="logo" href="../index.html"><img src="../logo-zzp.svg?v=12" alt="ATAS ZZP" width="190" height="34"></a><nav class="hnav"><a class="btn pill" href="../plaatsen.html">Klus plaatsen</a></nav></div></header>
 <main><div class="wrap narrow" style="padding-top:calc(var(--hh) + 14px);padding-bottom:70px"><a class="back" href="../index.html#resultaten">&larr; Alle klussen</a>
 <div class="article"><div class="jt"><h1>{titel}</h1><span class="kvkbadge v"><span class="coin">&#10003;</span><span>KvK Gecontroleerd</span></span></div>
 <dl><dt>Opdrachtgever</dt><dd>{bedrijf}</dd><dt>KvK-nummer</dt><dd>{kvk}</dd><dt>Categorie</dt><dd>{categorie}</dd><dt>Soort klus</dt><dd>{subklus}</dd><dt>Regio</dt><dd>{regio}</dd><dt>Omvang en duur</dt><dd>{duur}</dd><dt>Tarief</dt><dd>{tarief}</dd></dl>
@@ -114,7 +114,7 @@ if __name__ == "__main__":
             ld=json.dumps(jobposting(j), ensure_ascii=False).replace("<", "\\u003c")), encoding="utf-8")
     vandaag = date.today().isoformat()
     urls = [(f"{SITE}/", vandaag, "1.0"), (f"{SITE}/plaatsen.html", vandaag, "0.9"), (f"{SITE}/werkwijze.html", vandaag, "0.7"), (f"{SITE}/wet-dba-kvk.html", vandaag, "0.7"), (f"{SITE}/voorwaarden.html", vandaag, "0.4")] + \
-           [(f"{SITE}/ilan/{j['id']}.html", str(j.get("created_at") or vandaag)[:10], "0.8") for j in lijst]
+           [(f"{SITE}/regios.html", vandaag, "0.8")] + [(f"{SITE}/{p.name}", vandaag, "0.8") for p in sorted(HERE.glob("zzp-*.html"))] +            [(f"{SITE}/ilan/{j['id']}.html", str(j.get("created_at") or vandaag)[:10], "0.8") for j in lijst]
     (HERE / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
         "".join(f"  <url><loc>{u}</loc><lastmod>{m}</lastmod><priority>{p}</priority></url>\n" for u, m, p in urls) + "</urlset>\n", encoding="utf-8")
     print(f"{len(lijst)} klus(sen), sitemap bijgewerkt")

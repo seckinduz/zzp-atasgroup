@@ -5,7 +5,7 @@
  "kamerToeslag": 0.03,
  "kamerMax": 1.3,
  "minimum": 150,
- "regios": ["Drenthe (Emmen)", "Groningen", "Overijssel", "Noord-Holland", "Zuid-Holland", "Utrecht", "Landelijk / Op afstand"],
+ "regios": ["Drenthe (Emmen)", "Groningen", "Friesland", "Overijssel", "Flevoland", "Gelderland", "Utrecht", "Noord-Holland", "Zuid-Holland", "Zeeland", "Noord-Brabant", "Limburg", "Landelijk / Op afstand"],
  "categorieen": [
   { "id": "bouw", "naam": "Bouw, Techniek & Installatie", "subs": [
       {"id": "elektricien", "naam": "Elektricien", "eenheid": "uur", "ref": [5500, 7500], "materiaal": 0},
@@ -42,6 +42,38 @@
       {"id": "zakelijke-schoonmaak", "naam": "Zakelijke Schoonmaak", "eenheid": "m2", "ref": [200, 350], "materiaal": 0.1},
       {"id": "glasbewassing", "naam": "Glasbewassing", "eenheid": "m2", "ref": [150, 300], "materiaal": 0.1},
       {"id": "hovenier-groenonderhoud", "naam": "Hovenier & Groenonderhoud", "eenheid": "uur", "ref": [3500, 5000], "materiaal": 0}
+  ] },
+  { "id": "tuin", "naam": "Tuin & Bestrating", "subs": [
+      {"id": "bestrating-en-straatwerk", "naam": "Bestrating en straatwerk", "eenheid": "m2", "ref": [3000, 5500], "materiaal": 0.9},
+      {"id": "tuinaanleg", "naam": "Tuinaanleg", "eenheid": "m2", "ref": [3500, 6500], "materiaal": 0.8},
+      {"id": "gazon-aanleggen", "naam": "Gazon aanleggen", "eenheid": "m2", "ref": [800, 1500], "materiaal": 0.4},
+      {"id": "schutting-en-afrastering", "naam": "Schutting en afrastering", "eenheid": "m2", "ref": [2500, 4500], "materiaal": 0.9},
+      {"id": "terras-en-oprit", "naam": "Terras en oprit", "eenheid": "m2", "ref": [3500, 6000], "materiaal": 0.9},
+      {"id": "tuinonderhoud-en-snoeiwerk", "naam": "Tuinonderhoud en snoeiwerk", "eenheid": "uur", "ref": [3500, 5000], "materiaal": 0}
+  ] },
+  { "id": "dak", "naam": "Dak & Isolatie", "subs": [
+      {"id": "dakbedekking", "naam": "Dakbedekking", "eenheid": "m2", "ref": [4000, 7500], "materiaal": 0.7},
+      {"id": "dakisolatie", "naam": "Dakisolatie", "eenheid": "m2", "ref": [2500, 5000], "materiaal": 0.9},
+      {"id": "spouwmuurisolatie", "naam": "Spouwmuurisolatie", "eenheid": "m2", "ref": [1200, 2500], "materiaal": 0.8},
+      {"id": "vloerisolatie", "naam": "Vloerisolatie", "eenheid": "m2", "ref": [1500, 3000], "materiaal": 0.9},
+      {"id": "gevelisolatie-en-gevelwerk", "naam": "Gevelisolatie en gevelwerk", "eenheid": "m2", "ref": [3500, 6500], "materiaal": 0.8},
+      {"id": "zonnepanelen-plaatsen", "naam": "Zonnepanelen plaatsen", "eenheid": "uur", "ref": [4500, 7000], "materiaal": 0}
+  ] },
+  { "id": "horeca", "naam": "Horeca & Facilitair", "subs": [
+      {"id": "kok", "naam": "Kok", "eenheid": "uur", "ref": [4500, 6500], "materiaal": 0},
+      {"id": "bediening", "naam": "Bediening", "eenheid": "uur", "ref": [3000, 4200], "materiaal": 0},
+      {"id": "barista-en-barmedewerker", "naam": "Barista en barmedewerker", "eenheid": "uur", "ref": [3200, 4500], "materiaal": 0},
+      {"id": "keukenhulp-en-afwas", "naam": "Keukenhulp en afwas", "eenheid": "uur", "ref": [2800, 3800], "materiaal": 0},
+      {"id": "facilitair-medewerker", "naam": "Facilitair medewerker", "eenheid": "uur", "ref": [3200, 4800], "materiaal": 0},
+      {"id": "evenement-en-catering", "naam": "Evenement en catering", "eenheid": "uur", "ref": [4000, 6000], "materiaal": 0}
+  ] },
+  { "id": "techniek", "naam": "Techniek & Metaal", "subs": [
+      {"id": "lassen", "naam": "Lassen", "eenheid": "uur", "ref": [5500, 8000], "materiaal": 0},
+      {"id": "monteur-machines", "naam": "Monteur machines", "eenheid": "uur", "ref": [5000, 7500], "materiaal": 0},
+      {"id": "cnc-en-draaien", "naam": "CNC en draaien", "eenheid": "uur", "ref": [5500, 8500], "materiaal": 0},
+      {"id": "constructiewerk", "naam": "Constructiewerk", "eenheid": "uur", "ref": [5000, 7500], "materiaal": 0},
+      {"id": "storingsmonteur", "naam": "Storingsmonteur", "eenheid": "uur", "ref": [5000, 7500], "materiaal": 0},
+      {"id": "plaatwerk", "naam": "Plaatwerk", "eenheid": "uur", "ref": [5200, 7800], "materiaal": 0}
   ] }
  ]
 }

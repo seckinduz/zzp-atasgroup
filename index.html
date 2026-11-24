@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="stylesheet" href="style.css?v=11">
-<link rel="stylesheet" href="zzp.css?v=11">
+<link rel="stylesheet" href="style.css?v=12">
+<link rel="stylesheet" href="zzp.css?v=12">
 <title>ZZP Netwerk en klussen in heel Nederland | ATAS ZZP, Emmen</title>
-<meta name="description" content="Vind ZZP-klussen en opdrachten in heel Nederland: bouw, logistiek, IT, finance, zorg en schoonmaak. Filter op regio en categorie. Alle leden met KvK, plus een gratis ZZP Uurtarief Calculator.">
+<meta name="description" content="Vind ZZP-klussen en opdrachten in heel Nederland: bouw, techniek, tuin, dak, horeca, logistiek, IT, finance, zorg en schoonmaak. Filter op regio en categorie. Alle leden met KvK, plus een gratis ZZP Uurtarief Calculator.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <link rel="canonical" href="https://zzp.atasgroup.nl/">
 <link rel="alternate" hreflang="nl-NL" href="https://zzp.atasgroup.nl/">
@@ -121,7 +121,7 @@
      "name": "In welke regio is ATAS ZZP actief?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "Atas Group is gevestigd in Emmen. Het netwerk is actief in heel Nederland: Drenthe (Emmen), Groningen, Overijssel, Noord-Holland, Zuid-Holland, Utrecht en landelijk of op afstand. U filtert op regio en categorie."
+      "text": "Atas Group is gevestigd in Emmen. Het netwerk is actief in heel Nederland: alle 12 provincies, met Emmen als thuisbasis, en landelijk of op afstand. U filtert op regio en categorie."
      }
     },
     {
@@ -151,7 +151,7 @@
 <div class="glow" aria-hidden="true"><i></i><i></i><i></i></div>
 <a class="skip" href="#inhoud">Direct naar de inhoud</a>
 <header class="site"><div class="wrap hz">
-  <a class="logo" href="index.html" aria-label="ATAS ZZP, naar de homepage"><img src="logo-zzp.svg?v=11" alt="ATAS ZZP" width="190" height="34"></a>
+  <a class="logo" href="index.html" aria-label="ATAS ZZP, naar de homepage"><img src="logo-zzp.svg?v=12" alt="ATAS ZZP" width="190" height="34"></a>
   <nav class="hnav" aria-label="Hoofdmenu"><a class="plain" id="nav-account" href="account.html">Inloggen</a><a class="btn pill" href="plaatsen.html">Klus plaatsen</a></nav>
 </div></header>
 
@@ -159,19 +159,41 @@
 <section class="hero-zzp"><div class="wrap">
   <span class="kicker">ATAS ZZP Netwerk · Emmen · Heel Nederland</span>
   <h1>Klussen en <em>ZZP'ers</em> in heel Nederland.</h1>
-  <p class="sub">Beschrijf uw klus in 4 stappen, zie direct een richtbegroting en download uw werkplan als PDF. Of zoek opdrachten op postcode en straal. Elk lid heeft een geldig KvK-nummer.</p>
+  <p class="sub">Beschrijf uw klus in 4 stappen, zie direct een richtbegroting en download uw werkplan als PDF. Of zoek opdrachten op vakgebied en plaats. Elk lid heeft een geldig KvK-nummer.</p>
+  <form class="sbar" id="sbar" role="search" aria-label="Zoek een klus of ZZP'er" novalidate>
+    <label class="sf"><span class="sr">Vakgebied of klus</span><input id="s-q" placeholder="Vakgebied of klus..." autocomplete="off" enterkeyhint="search"></label>
+    <label class="sf"><span class="sr">Postcode of stad</span><input id="s-plaats" placeholder="Postcode of stad (bijv. 7823 Emmen)" autocomplete="off" enterkeyhint="search"></label>
+    <button class="btn pill" type="submit">Zoeken</button>
+  </form>
+  <ul class="strip" aria-label="Waarom ATAS ZZP"><li><span class="coin">✓</span>100% KvK Gecontroleerd</li><li><span class="coin">✓</span>Direct zakelijk contact</li><li><span class="coin">✓</span>Alle 12 provincies</li></ul>
   <div class="cta"><a class="btn pill" href="plaatsen.html">Klus plaatsen</a><a class="btn ghost" href="account.html">Aanmelden als ZZP'er</a></div>
   <div class="duo">
     <button type="button" class="duo-p" id="p-ben" aria-pressed="true"><b>Ik ben ZZP'er</b><span>Zoek klussen en reageer met één klik.</span></button>
     <button type="button" class="duo-p" id="p-zoek" aria-pressed="false"><b>Ik zoek een ZZP'er</b><span>Bekijk ZZP'ers in uw regio.</span></button>
   </div>
-  <form class="filters" id="zoekform" role="search" aria-label="Zoeken" novalidate>
+  <details class="meer"><summary>Meer filters</summary>
+  <form class="filters" id="zoekform" role="search" aria-label="Filters" novalidate>
     <label>Regio<select id="f-regio"><option value="">Heel Nederland</option></select></label>
     <label>Categorie<select id="f-cat"><option value="">Alle categorieën</option></select></label>
     <label>Trefwoord<input id="f-q" placeholder="bijv. elektricien" autocomplete="off"></label>
     <label class="chk"><input type="checkbox" id="f-spoed"> Alleen spoedklussen (48 uur)</label>
   </form>
-  <div class="regio" id="regio" role="group" aria-label="Snel kiezen: regio"></div>
+  <div class="regio" id="regio" role="group" aria-label="Snel kiezen: regio"></div></details>
+</div></section>
+
+<section class="blk" id="vakgebieden" aria-labelledby="h-v"><div class="wrap">
+  <p class="eyebrow">Vakgebieden</p><h2 id="h-v">Kies uw vakgebied en start de wizard.</h2>
+  <div class="cats"><a class="catc" href="plaatsen.html?cat=bouw"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg><h3>Bouw, Techniek &amp; Installatie</h3><span class="avg">gem. € 45–€ 75/uur</span><span class="go">Klus plaatsen &rarr;</span></a><a class="catc" href="plaatsen.html?cat=logistiek"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 6h13v10H1zM14 9h4l3 3v4h-7z"/><circle cx="6" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg><h3>Logistiek, Transport &amp; Magazijn</h3><span class="avg">gem. € 30–€ 48/uur</span><span class="go">Klus plaatsen &rarr;</span></a><a class="catc" href="plaatsen.html?cat=it"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 6l-3 12"/></svg><h3>IT, Software &amp; AI</h3><span class="avg">gem. € 65–€ 105/uur</span><span class="go">Klus plaatsen &rarr;</span></a><a class="catc" href="plaatsen.html?cat=zakelijk"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg><h3>Zakelijke Dienstverlening &amp; Finance</h3><span class="avg">gem. € 55–€ 95/uur</span><span class="go">Klus plaatsen &rarr;</span></a><a class="catc" href="plaatsen.html?cat=zorg"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/></svg><h3>Zorg &amp; Welzijn</h3><span class="avg">gem. € 35–€ 55/uur</span><span class="go">Klus plaatsen &rarr;</span></a><a class="catc" href="plaatsen.html?cat=schoonmaak"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></svg><h3>Schoonmaak &amp; Facilitair</h3><span class="avg">gem. € 25–€ 38/uur</span><span class="go">Klus plaatsen &rarr;</span></a><a class="catc" href="plaatsen.html?cat=tuin"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21v-9M12 12c0-4 3-7 8-7 0 5-3 8-8 7zM12 15c0-3-2-5-6-5 0 4 2 6 6 5z"/></svg><h3>Tuin &amp; Bestrating</h3><span class="avg">gem. € 38–€ 60/uur</span><span class="go">Klus plaatsen &rarr;</span></a><a class="catc" href="plaatsen.html?cat=dak"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7M5 10v10h14V10M10 20v-6h4v6"/></svg><h3>Dak &amp; Isolatie</h3><span class="avg">gem. € 45–€ 70/uur</span><span class="go">Klus plaatsen &rarr;</span></a><a class="catc" href="plaatsen.html?cat=horeca"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3v7a2 2 0 0 0 2 2v9M7 3v5M11 3v5M9 3v5M17 3c-2 2-2.5 5-2 8h2v10"/></svg><h3>Horeca &amp; Facilitair</h3><span class="avg">gem. € 25–€ 45/uur</span><span class="go">Klus plaatsen &rarr;</span></a><a class="catc" href="plaatsen.html?cat=techniek"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg><h3>Techniek &amp; Metaal</h3><span class="avg">gem. € 50–€ 80/uur</span><span class="go">Klus plaatsen &rarr;</span></a></div>
+  <p class="note" style="margin-top:12px">Uurtarieven zijn indicatieve richtprijzen excl. btw, geen offerte. ZZP'ers bepalen hun eigen tarief.</p>
+</div></section>
+
+<section class="blk" id="vitrine" aria-labelledby="h-vit"><div class="wrap">
+  <p class="eyebrow">Vitrine</p><h2 id="h-vit">Actuele klussen</h2>
+  <div class="jobs" id="vit-klussen" aria-live="polite"></div>
+  <h2 style="margin-top:34px" id="h-vz">Uitgelichte ZZP'ers</h2>
+  <div class="jobs" id="vit-zzp" aria-live="polite"></div>
+  <p class="note" style="margin-top:12px">Items met het label Voorbeeld zijn illustraties van hoe een klus of profiel eruitziet. Echte klussen en leden met KvK staan altijd bovenaan.</p>
+  <p style="margin-top:12px"><a class="btn ghost" href="regios.html">Bekijk het werkgebied per regio</a></p>
 </div></section>
 
 <section class="blk" id="resultaten" aria-labelledby="res-titel"><div class="wrap">
@@ -193,7 +215,7 @@
 <section class="blk" id="werkwijze" aria-labelledby="h-w"><div class="wrap">
   <p class="eyebrow">Hoe het werkt</p><h2 id="h-w">Van klus tot opdracht in vier stappen.</h2>
   <div class="steps">
-    <article class="step"><b>1</b><h3>Kies de klus</h3><p>Uit 6 categorieën en 24 soorten klussen, van elektricien en schilder tot IT en zorg.</p></article>
+    <article class="step"><b>1</b><h3>Kies de klus</h3><p>Uit 10 categorieën en 48 soorten klussen, van elektricien en schilder tot IT, tuin, dak en horeca.</p></article>
     <article class="step"><b>2</b><h3>Vul het plan in</h3><p>Oppervlak of uren, ruimtes, materiaal en eventueel spoed binnen 48 uur, met foto's.</p></article>
     <article class="step"><b>3</b><h3>Zie de richtbegroting</h3><p>Een indicatie op basis van een vaste referentie van 100 m² of 100 uur. Download uw werkplan als PDF.</p></article>
     <article class="step"><b>4</b><h3>Publiceer met KvK</h3><p>Alleen met een geldig 8-cijferig KvK-nummer en de Wet DBA-controle.</p></article>
@@ -203,7 +225,7 @@
 
 <section class="blk" id="dekking" aria-labelledby="h-d"><div class="wrap">
   <p class="eyebrow">Regio</p><h2 id="h-d">Gevestigd in Emmen, actief in heel Nederland.</h2>
-  <p class="lead2">Klussen en ZZP'ers in Drenthe (Emmen), Groningen, Overijssel, Noord-Holland, Zuid-Holland, Utrecht en landelijk of op afstand. Kies uw regio met één tik.</p>
+  <p class="lead2">Klussen en ZZP'ers in alle 12 provincies: Drenthe (Emmen), Groningen, Friesland, Overijssel, Flevoland, Gelderland, Utrecht, Noord-Holland, Zuid-Holland, Zeeland, Noord-Brabant en Limburg, of landelijk en op afstand. <a class="back" href="regios.html">Bekijk het werkgebied heel Nederland</a></p>
 </div></section>
 
 <section class="blk" id="calculator" aria-labelledby="h-c"><div class="wrap">
@@ -238,17 +260,17 @@
 <details><summary><h3>Waarom is een KvK-nummer verplicht?</h3></summary><p>Alle ZZP'ers en opdrachtgevers vullen een geldig 8-cijferig KvK-nummer in. Profielen met een geldig nummer krijgen het label KvK Gecontroleerd. Het nummer wordt op vorm gecontroleerd; Atas Group kan nummers in het Handelsregister nagaan en profielen met onjuiste gegevens weigeren of verwijderen.</p></details>
 <details><summary><h3>Wat betekenen de VCA-, AVB- en Wet DBA-badges?</h3></summary><p>ZZP'ers kunnen aangeven dat zij een VCA-certificaat, een AVB-bedrijfsaansprakelijkheidsverzekering en een Modelovereenkomst van de Belastingdienst hebben. Deze gegevens zijn zelf verklaard en als zodanig gemarkeerd.</p></details>
 <details><summary><h3>Hoe werkt de richtbegroting?</h3></summary><p>De wizard rekent met een vaste referentie van 100 m² of 100 uur per soort klus en schaalt die naar uw oppervlak, ruimtes, materiaal en eventuele spoed. Het resultaat is een indicatie, geen offerte. ZZP'ers reageren met hun eigen bedrag.</p></details>
-<details><summary><h3>In welke regio is ATAS ZZP actief?</h3></summary><p>Atas Group is gevestigd in Emmen. Het netwerk is actief in heel Nederland: Drenthe (Emmen), Groningen, Overijssel, Noord-Holland, Zuid-Holland, Utrecht en landelijk of op afstand. U filtert op regio en categorie.</p></details>
+<details><summary><h3>In welke regio is ATAS ZZP actief?</h3></summary><p>Atas Group is gevestigd in Emmen. Het netwerk is actief in heel Nederland: alle 12 provincies, met Emmen als thuisbasis, en landelijk of op afstand. U filtert op regio en categorie.</p></details>
 <details><summary><h3>Hoe bereken ik mijn uurtarief als ZZP'er?</h3></summary><p>Gebruik de ZZP Uurtarief Calculator op deze pagina. U vult uw netto doelinkomen, declarabele uren, vakantie, kosten, verzekeringen en belastingreserve in en ziet een aanbevolen uurtarief excl. btw. Het is een indicatie en geen belastingadvies.</p></details>
 <details><summary><h3>Kan ik mijn werkplan als PDF downloaden?</h3></summary><p>Ja. Na de wizard en op elke klus kunt u een werkplan met begroting openen en via Opslaan als PDF in het afdrukvenster bewaren of printen.</p></details>
   </div>
 </div></section>
 </main>
 <footer class="site"><div class="wrap">
-  <img class="flogo" src="logo-zzp.svg?v=11" alt="ATAS ZZP" width="150" height="30">
-  <nav class="fnav" aria-label="Informatie"><a href="werkwijze.html">Hoe het werkt</a><a href="wet-dba-kvk.html">Wet DBA &amp; KvK Zekerheid</a><a href="voorwaarden.html">Voorwaarden &amp; Privacy</a><a href="plaatsen.html">Klus plaatsen</a></nav>
+  <img class="flogo" src="logo-zzp.svg?v=12" alt="ATAS ZZP" width="150" height="30">
+  <nav class="fnav" aria-label="Informatie"><a href="werkwijze.html">Hoe het werkt</a><a href="wet-dba-kvk.html">Wet DBA &amp; KvK Zekerheid</a><a href="voorwaarden.html">Voorwaarden &amp; Privacy</a><a href="regios.html">Werkgebied</a><a href="plaatsen.html">Klus plaatsen</a></nav>
   <p>ATAS ZZP Netwerk · Onderdeel van <a href="https://atasgroup.nl">Atas Group</a> · Emmen, Nederland · Actief in heel Nederland · <a href="mailto:sales@atasgroup.nl">sales@atasgroup.nl</a></p>
 </div></footer>
-<script src="config.js"></script><script src="db.js?v=11"></script><script src="geo.js?v=11"></script><script src="app.js?v=11"></script>
+<script src="config.js"></script><script src="db.js?v=12"></script><script src="geo.js?v=12"></script><script src="app.js?v=12"></script>
 </body>
 </html>

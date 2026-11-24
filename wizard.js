@@ -127,6 +127,9 @@
     if (step === 3) { if (!(Number(S.aantal) > 0)) return; return go(4); }
     if (step === 4) return publiceer();
   });
-  Promise.all([U.loadWerk(), Z.me()]).then(function (r) { W = r[0]; me = r[1]; if (S.cat && !cat()) { S.cat = ''; S.sub = ''; } if (step >= 2 && !S.cat) step = 1; if (step >= 3 && !sub()) step = S.cat ? 2 : 1; render(); })
+  Promise.all([U.loadWerk(), Z.me()]).then(function (r) { W = r[0]; me = r[1]; try { var qp = new URLSearchParams(location.search), qc = qp.get('cat'), qr = qp.get('regio'), hit = qc && W.categorieen.filter(function (c) { return c.id === qc || c.naam === qc; })[0];
+      if (hit) { S.cat = hit.naam; S.sub = ''; step = 2; var qs = qp.get('sub'), sh = qs && hit.subs.filter(function (s) { return s.id === qs || s.naam === qs; })[0]; if (sh) { S.sub = sh.naam; step = 3; } }
+      if (qr && W.regios.indexOf(qr) >= 0) S.region = qr; } catch (e) { }
+      if (S.cat && !cat()) { S.cat = ''; S.sub = ''; } if (step >= 2 && !S.cat) step = 1; if (step >= 3 && !sub()) step = S.cat ? 2 : 1; render(); })
     .catch(function () { body.textContent = 'De wizard kon niet worden geladen. Ververs de pagina.'; });
 })();
