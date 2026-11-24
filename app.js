@@ -33,7 +33,6 @@
   }
   var naam = function (p) { return p ? (p.company_name || p.full_name) : ''; };
   Z.me().then(function (m) { var a = $('nav-account'); if (a) a.textContent = m ? 'Mijn paneel' : 'Inloggen'; });
-  if (Z.mode === 'demo' && $('testbanner')) { var tb = $('testbanner'), ft = document.querySelector('footer.site'); tb.hidden = false; if (ft) ft.parentNode.insertBefore(tb, ft); }
 
   function jobPosting(j) {
     var p = j.profiles || {}, esc = function (x) { return String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;'); };
