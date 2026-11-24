@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /account.html
+Disallow: /dashboard.html
 Disallow: /werkplan.html
 
 Sitemap: https://zzp.atasgroup.nl/sitemap.xml

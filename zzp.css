@@ -241,3 +241,20 @@ details.faqd,#faq details{border:1.5px solid rgba(17,24,39,.14);border-radius:16
 .mdl label[hidden]{display:none}
 body.lock{overflow:hidden}
 .toastmsg{position:fixed;left:16px;right:16px;bottom:16px;z-index:400;background:#111827;color:#fff;padding:12px 16px;border-radius:14px;text-align:center;font-weight:600}
+
+/* gebruikersmenu (avatar) */
+.umenu{position:relative}
+.ubtn{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:4px 14px 4px 4px;border-radius:99px;border:2px solid #111827;background:#fff;cursor:pointer;font:inherit}
+.ubtn:hover{border-color:#F36F21}
+.uav{position:relative;width:36px;height:36px;border-radius:50%;background:#F36F21;color:#111827;display:grid;place-items:center;font-weight:800;font-size:.8rem;overflow:hidden;flex:none}
+.uav img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.uav .ini{position:relative;z-index:0}.uav img+.ini{opacity:0}
+.uname{display:grid;text-align:left;line-height:1.15}.uname b{font-size:.86rem}.uname i{font-style:normal;font-size:.68rem;font-weight:800;color:#C2410C;text-transform:uppercase;letter-spacing:.05em}
+.umenu-list{position:absolute;right:0;top:calc(100% + 8px);min-width:250px;background:#fff;border:2px solid #111827;border-radius:18px;padding:6px;z-index:90;box-shadow:0 24px 50px -20px rgba(17,24,39,.5);display:grid}
+.umenu-list[hidden]{display:none}
+.umenu-head{padding:10px 12px;border-bottom:1px solid rgba(17,24,39,.12);margin-bottom:4px;display:grid;gap:3px}
+.umenu-head small{color:var(--mute);word-break:break-all}.urole{justify-self:start;background:#F36F21;color:#111827;font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:99px}
+.umenu-list a,.umenu-list button{display:flex;align-items:center;min-height:44px;padding:0 12px;border-radius:12px;border:0;background:transparent;font:inherit;font-weight:600;color:var(--ink);text-align:left;cursor:pointer;width:100%}
+.umenu-list a:hover,.umenu-list button:hover{background:rgba(243,111,33,.12)}
+@media(max-width:560px){.uname{display:none}.ubtn{padding:4px}}
+.hnav a[hidden]{display:none!important}

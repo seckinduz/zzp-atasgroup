@@ -32,7 +32,6 @@
     return w.childNodes.length ? w : null;
   }
   var naam = function (p) { return p ? (p.company_name || p.full_name) : ''; };
-  Z.me().then(function (m) { var a = $('nav-account'); if (a) a.textContent = m ? 'Mijn paneel' : 'Inloggen'; });
 
   function jobPosting(j) {
     var p = j.profiles || {}, esc = function (x) { return String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;'); };
@@ -48,6 +47,35 @@
     return o;
   }
   window.ZUI = { h: h, eur: eur, datum: datum, badge: badge, trust: trust, loadWerk: loadWerk, $: $, rateTxt: rateTxt, naam: naam, REMOTE_REGIO: REMOTE_REGIO };
+
+  /* ---------------- gebruikersmenu (avatar) ---------------- */
+  var initials = function (n) { return (n || '?').trim().split(/\s+/).slice(0, 2).map(function (x) { return x.charAt(0).toUpperCase(); }).join(''); };
+  function userMenu() {
+    var link = $('nav-account'); if (!link) return;
+    var old = document.querySelector('.umenu'); if (old) old.remove();
+    Promise.all([Z.session(), Z.me()]).then(function (r) {
+      var s = r[0], m = r[1]; if (!s) { link.hidden = false; return; }
+      link.hidden = true;
+      var md = (s.user && s.user.user_metadata) || {}, p = m && m.profile, naam0 = (p && p.full_name) || md.full_name || md.name || (s.user && s.user.email) || 'Account';
+      var role = p && p.role, rl = role === 'zzp' ? 'ZZP\'er' : role === 'opdrachtgever' ? 'Opdrachtgever' : '', foto = md.avatar_url || md.picture;
+      var av = h('span', { class: 'uav', 'aria-hidden': 'true' }, initials(naam0));
+      if (foto) { var im = h('img', { src: foto, alt: '', referrerpolicy: 'no-referrer', width: '36', height: '36' }); im.addEventListener('error', function () { im.remove(); }); av.textContent = ''; av.appendChild(im); av.appendChild(h('span', { class: 'ini' }, initials(naam0))); }
+      var dash = 'dashboard.html?tab=' + (role || 'zzp');
+      var menu = h('div', { class: 'umenu-list', role: 'menu', hidden: 'hidden' },
+        h('div', { class: 'umenu-head' }, h('b', { text: naam0 }), rl && h('span', { class: 'urole', text: rl }), h('small', { text: s.user && s.user.email })),
+        h('a', { role: 'menuitem', href: dash, text: 'Mijn Dashboard' }), h('a', { role: 'menuitem', href: 'dashboard.html?tab=profiel#profiel', text: 'Profiel & KvK bewerken' }),
+        h('button', { role: 'menuitem', type: 'button', text: 'Uitloggen', onclick: function () { Z.signOut().then(function () { location.href = 'index.html'; }); } }));
+      var btn = h('button', { type: 'button', class: 'ubtn', 'aria-haspopup': 'true', 'aria-expanded': 'false', 'aria-label': 'Gebruikersmenu van ' + naam0 }, av, h('span', { class: 'uname' }, h('b', { text: naam0.split(' ')[0] }), rl && h('i', { text: rl })));
+      var wrap = h('div', { class: 'umenu' }, btn, menu);
+      function sluit() { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
+      btn.addEventListener('click', function (e) { e.stopPropagation(); var o = menu.hidden; menu.hidden = !o; btn.setAttribute('aria-expanded', o); });
+      document.addEventListener('click', function (e) { if (!wrap.contains(e.target)) sluit(); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') sluit(); });
+      link.parentNode.insertBefore(wrap, link.nextSibling);
+    }).catch(function () { });
+  }
+  userMenu();
+  window.addEventListener('storage', function (e) { if (e.key === 'zzp_sb' || e.key === 'zzp_demo_session') userMenu(); });
 
   var page = document.body.getAttribute('data-page');
   var matchRegio = function (sel, r) { return !sel || r === sel || r === REMOTE_REGIO; };
@@ -152,11 +180,11 @@
 
   /* ---------------- ACCOUNT ---------------- */
   function account() {
-    var root = $('acc'), terug = new URLSearchParams(location.search).get('terug');
+    var root = $('acc'), terug = new URLSearchParams(location.search).get('terug'), isDash = page === 'dashboard';
     var msg = function (cls, t) { return h('p', { class: cls, role: cls === 'err' ? 'alert' : 'status', text: t || '' }); };
     function veld(lbl, name, attrs) { return h('label', null, lbl, h('input', Object.assign({ name: name }, attrs || {}))); }
     function sel(name, val, lijst, leegTxt) { var s = h('select', { name: name }); s.appendChild(h('option', { value: '', text: leegTxt })); lijst.forEach(function (c) { s.appendChild(h('option', { value: c, text: c })); }); s.value = val || ''; return s; }
-    var go = function () { if (terug && /^[a-z-]+\.html/.test(terug)) location.href = terug; else paneel(); };
+    var go = function () { if (terug && /^[a-z-]+\.html/.test(terug)) location.href = terug; else location.href = 'dashboard.html'; };
     var badgeBoxes = function (b) {
       b = b || {};
       return h('div', { class: 'fgrid', style: 'gap:2px' }, h('span', { class: 'hint', style: 'font-weight:700' }, 'Zekerheid (optioneel, zelf verklaard)'),
@@ -219,12 +247,22 @@
       return h('div', { class: 'dashhead' }, h('div', null, h('p', { class: 'eyebrow', text: m.profile.role === 'zzp' ? 'ZZP-paneel' : 'Paneel opdrachtgever' }), h('h2', { class: 'dh', text: naam(m.profile) }), h('p', { class: 'hint', text: 'KvK ' + m.profile.kvk_number + ' · ' + m.user.email })),
         h('div', { class: 'dhr' }, badge(m.profile), trust(m.profile), h('button', { class: 'mini', type: 'button', text: 'Uitloggen', onclick: function () { Z.signOut().then(function () { location.href = 'account.html'; }); } })));
     }
-    function paneel() { Z.me().then(function (m) { if (!m) return gast(); root.textContent = ''; root.appendChild(kop(m)); (m.profile.role === 'zzp' ? zzpPaneel : ogPaneel)(m); }); }
+    function paneel() {
+      Z.me().then(function (m) {
+        if (!m) { if (isDash) { location.replace('account.html'); return; } return gast(); }
+        if (!isDash) { location.replace('dashboard.html?tab=' + (m.profile.role || 'zzp')); return; }
+        if (!m.profile.role) return;
+        var tab = new URLSearchParams(location.search).get('tab');
+        try { history.replaceState(null, '', 'dashboard.html?tab=' + (tab === 'profiel' ? 'profiel' : m.profile.role) + location.hash); } catch (e) { }
+        root.textContent = ''; root.appendChild(kop(m)); (m.profile.role === 'zzp' ? zzpPaneel : ogPaneel)(m);
+        if (tab === 'profiel') setTimeout(function () { var pf = $('profiel'); if (pf) { if (pf.tagName === 'DETAILS') pf.open = true; pf.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }, 500);
+      });
+    }
 
     function zzpPaneel(m) {
       var p = m.profile, er = msg('err'), ok = msg('okmsg');
       loadWerk().then(function (W) {
-        var f = h('form', { class: 'formbox', novalidate: 'novalidate' }, h('h3', { text: 'Mijn profiel' }),
+        var f = h('form', { class: 'formbox', id: 'profiel', novalidate: 'novalidate' }, h('h3', { text: 'Mijn profiel' }),
           h('div', { class: 'row2' }, veld('Bedrijfsnaam', 'company_name', { value: p.company_name || '' }), veld('Uw naam', 'full_name', { value: p.full_name || '' })),
           h('div', { class: 'row2' }, veld('KvK-nummer (8 cijfers)', 'kvk_number', { value: p.kvk_number || '', maxlength: '8', inputmode: 'numeric' }), veld('Uurtarief (€ excl. btw)', 'hourly_rate', { type: 'number', min: '0', max: '1000', value: p.hourly_rate != null ? p.hourly_rate : '' })),
           h('div', { class: 'row2' }, h('label', null, 'Vakgebied', sel('category', p.category, W.categorieen.map(function (c) { return c.naam; }), 'Kies een categorie')), h('label', null, 'Regio', sel('region', p.region, W.regios, 'Kies een regio'))),
@@ -237,7 +275,23 @@
         });
         var lijst = h('div', { class: 'jobs' });
         root.appendChild(f); root.appendChild(h('h3', { class: 'sec', text: 'Mijn aanmeldingen' })); root.appendChild(lijst);
-        root.appendChild(h('p', { style: 'margin-top:14px' }, h('a', { class: 'btn ghost', href: 'index.html#resultaten', text: 'Bekijk actieve klussen' })));
+        root.appendChild(h('p', { style: 'margin-top:14px' }, h('a', { class: 'btn ghost', href: 'index.html#resultaten', text: 'Bekijk alle klussen' })));
+        var reg = h('div', { class: 'jobs' }); root.insertBefore(h('h3', { class: 'sec', text: 'Klussen in uw regio' + (p.region ? ': ' + p.region : '') }), root.firstChild.nextSibling); root.insertBefore(reg, root.firstChild.nextSibling.nextSibling);
+        Promise.all([Z.listJobs(), Z.myApplications()]).then(function (rr) {
+          var done = {}; rr[1].forEach(function (x) { done[x.job_id] = true; });
+          var l = rr[0].filter(function (j) { return matchRegio(p.region, j.region); }).sort(function (x, y) { return (y.category === p.category) - (x.category === p.category); });
+          if (!l.length) reg.appendChild(h('p', { class: 'note', text: 'Er zijn nu geen open klussen in uw regio.' }));
+          l.slice(0, 12).forEach(function (j) {
+            var st = h('span', { class: 'okmsg', role: 'status' }), b = h('button', { type: 'button', class: 'btn pill', text: done[j.id] ? 'Gereageerd ✓' : 'Reageer met één klik', disabled: done[j.id] ? 'disabled' : false });
+            b.addEventListener('click', function () {
+              b.disabled = true; b.textContent = 'Versturen…';
+              Z.apply(j.id, { message: 'Beste ' + naam(j.profiles) + ',\n\nIk reageer graag op uw klus "' + j.title + '". Mijn KvK-nummer is ' + p.kvk_number + '.\n\nMet vriendelijke groet,\n' + p.full_name, proposed_rate: null, email: m.user.email })
+                .then(function () { b.textContent = 'Gereageerd ✓'; st.textContent = ''; }).catch(function (x) { b.disabled = false; b.textContent = 'Reageer met één klik'; st.className = 'err'; st.textContent = x.message; });
+            });
+            reg.appendChild(h('div', { class: 'job' }, h('div', { class: 'jt' }, h('h3', { text: j.title }), badge(j.profiles)), h('span', { class: 'meta', text: [j.category, j.subcategory, j.region, j.duration].filter(Boolean).join(' · ') }), h('span', { class: 'rate', text: rateTxt(j) }),
+              h('div', { class: 'cta' }, b, h('a', { class: 'mini', href: 'ilan.html?id=' + j.id, text: 'Bekijken' })), st));
+          });
+        }).catch(function (x) { reg.appendChild(msg('err', x.message)); });
         Z.myApplications().then(function (r) {
           if (!r.length) lijst.appendChild(h('p', { class: 'note', text: 'U heeft nog niet gereageerd op een klus.' }));
           r.forEach(function (a) { var j = a.jobs; lijst.appendChild(h('a', { class: 'job', href: j ? 'ilan.html?id=' + j.id : '#' }, h('h3', { text: j ? j.title : 'Klus verwijderd' }), h('span', { class: 'meta', text: (j ? j.region + ' · ' + j.status + ' · ' : '') + 'verstuurd ' + datum(a.created_at) + (a.status ? ' · ' + a.status : '') }), h('span', { class: 'rate', text: a.proposed_rate != null ? 'Uw bod ' + eur(a.proposed_rate) : 'Geen bedrag opgegeven' }))); });
@@ -245,9 +299,17 @@
       });
     }
 
-    function ogPaneel() {
-      var lijst = h('div', { class: 'jobs' });
+    function ogPaneel(m) {
+      var lijst = h('div', { class: 'jobs' }), p = m.profile, er0 = msg('err'), ok0 = msg('okmsg');
       root.appendChild(h('p', null, h('a', { class: 'btn pill', href: 'plaatsen.html', text: 'Nieuwe klus plaatsen' })));
+      loadWerk().then(function (W) {
+        var pf = h('form', { novalidate: 'novalidate' }, h('div', { class: 'row2' }, veld('Bedrijfsnaam', 'company_name', { value: p.company_name || '' }), veld('Uw naam', 'full_name', { value: p.full_name || '' })),
+          h('div', { class: 'row2' }, veld('KvK-nummer (8 cijfers)', 'kvk_number', { value: p.kvk_number || '', maxlength: '8', inputmode: 'numeric' }), h('label', null, 'Regio', sel('region', p.region, W.regios, 'Kies een regio'))),
+          h('label', null, 'Categorie', sel('category', p.category, W.categorieen.map(function (c) { return c.naam; }), 'Kies een categorie')), er0, ok0, h('button', { class: 'btn pill', type: 'submit', text: 'Opslaan' }));
+        pf.addEventListener('submit', function (e) { e.preventDefault(); er0.textContent = ''; ok0.textContent = ''; var q = pf.elements;
+          Z.updateProfile({ company_name: q.company_name.value, full_name: q.full_name.value, kvk_number: q.kvk_number.value.replace(/\s+/g, ''), region: q.region.value, category: q.category.value }).then(function () { ok0.textContent = 'Opgeslagen.'; paneel(); }).catch(function (x) { er0.textContent = x.message; }); });
+        root.insertBefore(h('details', { class: 'accd', id: 'profiel', style: 'margin-top:12px' }, h('summary', { text: 'Profiel & KvK bewerken' }), pf), root.children[2]);
+      });
       root.appendChild(h('h3', { class: 'sec', text: 'Mijn klussen' })); root.appendChild(lijst);
       function laadLijst() {
         Z.myJobs().then(function (r) {
@@ -294,7 +356,7 @@
       e.preventDefault(); er.textContent = ''; var q = f.elements, b = f.querySelector('button[type=submit]');
       q.kvk_number.value = q.kvk_number.value.replace(/\s+/g, ''); b.disabled = true;
       Z.saveProfile({ role: role, full_name: q.full_name.value, company_name: q.company_name.value, kvk_number: q.kvk_number.value, category: q.category.value, region: q.region.value, hourly_rate: q.hourly_rate ? q.hourly_rate.value : null })
-        .then(function () { document.body.classList.remove('lock'); ov.remove(); location.href = 'account.html'; })
+        .then(function () { document.body.classList.remove('lock'); ov.remove(); try { sessionStorage.removeItem('zzp_just'); } catch (e) { } location.href = 'dashboard.html?tab=' + role; })
         .catch(function (x) { er.textContent = x.message; b.disabled = false; });
     });
     box.appendChild(h('h2', { id: 'mdl-t', text: 'Profiel voltooien' })); box.appendChild(h('p', { class: 'hint', text: 'Nog even uw gegevens aanvullen om verder te gaan. Een geldig KvK-nummer is verplicht.' })); box.appendChild(f);
@@ -308,8 +370,9 @@
   function toast(t) { var n = h('p', { class: 'toastmsg', role: 'alert', text: t }); document.body.appendChild(n); setTimeout(function () { n.remove(); }, 9000); }
   if (Z.mode === 'supabase') {
     var oe = Z.takeOauthError && Z.takeOauthError(); if (oe) toast(oe);
-    Z.session().then(function (s) { if (!s) return; return Z.rawProfile().then(function (r) { if (!r || !r.role || !r.kvk_number) profielModal(s, r); }); }).catch(function () { });
+    Z.session().then(function (s) { if (!s) return; return Z.rawProfile().then(function (r) { if (!r || !r.role || !r.kvk_number) return profielModal(s, r);
+      if (sessionStorage.getItem('zzp_just')) { sessionStorage.removeItem('zzp_just'); if (page !== 'dashboard') location.replace('dashboard.html?tab=' + r.role); } }); }).catch(function () { });
   }
 
-  var fn = { home: home, ilan: ilan, account: account }[page]; if (fn) fn();
+  var fn = { home: home, ilan: ilan, account: account, dashboard: account }[page]; if (fn) fn();
 })();

@@ -241,7 +241,7 @@
     try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
     if (hp.get('error')) oauthError = hp.get('error_description') || hp.get('error');
     else if (hp.get('access_token')) ready = fetch(base + '/auth/v1/user', { headers: { apikey: C.supabaseKey, Authorization: 'Bearer ' + hp.get('access_token') } })
-      .then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(function (u) { setTok({ access_token: hp.get('access_token'), refresh_token: hp.get('refresh_token'), user: u }); })
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(function (u) { setTok({ access_token: hp.get('access_token'), refresh_token: hp.get('refresh_token'), user: u }); try { sessionStorage.setItem('zzp_just', '1'); } catch (e) { } })
       .catch(function () { oauthError = 'Inloggen met Google is mislukt. Probeer het opnieuw.'; });
   }
   if (REMOTE) Object.keys(sb).forEach(function (k) { var f = sb[k]; sb[k] = function () { var a = arguments; return ready.then(function () { return f.apply(null, a); }); }; });
