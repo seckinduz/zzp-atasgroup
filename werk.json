@@ -1,78 +1,47 @@
 {
- "_uitleg": "Richtprijzen voor de begrotingswizard. Elke categorie heeft subklussen. ref = [min, max] ARBEIDSKOSTEN in euro voor een vaste referentie van 100 eenheden (100 m2 of 100 uur), excl. btw. eenheid = m2 of uur. materiaal = extra kosten als aandeel van de arbeid wanneer materiaal is inbegrepen (0 bij uren). Nieuwe categorie of klus toevoegen: kopieer een blok en pas de velden aan. De waarden zijn VOORBEELDWAARDEN en GEEN offerte: pas ze aan op basis van uw eigen ervaring.",
+ "_uitleg": "Richtprijzen voor de begrotingswizard en regio's voor de filters. ref = [min, max] ARBEIDSKOSTEN in euro voor een vaste referentie van 100 eenheden (100 m2 of 100 uur), excl. btw. eenheid = m2 of uur. materiaal = extra kosten als aandeel van de arbeid wanneer materiaal is inbegrepen (0 bij uren). Nieuwe categorie, klus of regio toevoegen: kopieer een blok en pas de velden aan. De waarden zijn VOORBEELDWAARDEN en GEEN offerte: pas ze aan op basis van uw eigen ervaring.",
  "referentie": 100,
  "spoedToeslag": 0.25,
  "kamerToeslag": 0.03,
  "kamerMax": 1.3,
  "minimum": 150,
+ "regios": ["Drenthe (Emmen)", "Groningen", "Overijssel", "Noord-Holland", "Zuid-Holland", "Utrecht", "Landelijk / Op afstand"],
  "categorieen": [
-  { "id": "bouw", "naam": "Bouw & Renovatie", "subs": [
-      {"id": "vloeren", "naam": "Vloeren", "eenheid": "m2", "ref": [1500, 2500], "materiaal": 0.8},
-      {"id": "tegelwerk", "naam": "Tegelwerk", "eenheid": "m2", "ref": [3000, 5000], "materiaal": 0.6},
-      {"id": "timmerwerk", "naam": "Timmerwerk", "eenheid": "m2", "ref": [3500, 6000], "materiaal": 0.7},
-      {"id": "metselwerk", "naam": "Metselwerk", "eenheid": "m2", "ref": [4000, 7000], "materiaal": 0.6}
+  { "id": "bouw", "naam": "Bouw, Techniek & Installatie", "subs": [
+      {"id": "elektricien", "naam": "Elektricien", "eenheid": "uur", "ref": [5500, 7500], "materiaal": 0},
+      {"id": "loodgieter-cv", "naam": "Loodgieter & CV", "eenheid": "uur", "ref": [5500, 7500], "materiaal": 0},
+      {"id": "timmerman", "naam": "Timmerman", "eenheid": "uur", "ref": [5000, 7000], "materiaal": 0},
+      {"id": "schilder", "naam": "Schilder", "eenheid": "m2", "ref": [1800, 3000], "materiaal": 0.2},
+      {"id": "zonnepanelen-laadpalen", "naam": "Zonnepanelen & Laadpalen", "eenheid": "uur", "ref": [5000, 7500], "materiaal": 0}
   ] },
-  { "id": "schilder", "naam": "Schilderwerk & Afwerking", "subs": [
-      {"id": "binnenschilderwerk", "naam": "Binnenschilderwerk", "eenheid": "m2", "ref": [1800, 3000], "materiaal": 0.2},
-      {"id": "buitenschilderwerk", "naam": "Buitenschilderwerk", "eenheid": "m2", "ref": [2500, 4500], "materiaal": 0.3},
-      {"id": "stucwerk", "naam": "Stucwerk", "eenheid": "m2", "ref": [2000, 3500], "materiaal": 0.25},
-      {"id": "behangen", "naam": "Behangen", "eenheid": "m2", "ref": [1500, 2800], "materiaal": 0.3}
+  { "id": "logistiek", "naam": "Logistiek, Transport & Magazijn", "subs": [
+      {"id": "chauffeur-ce/c", "naam": "Chauffeur CE/C", "eenheid": "uur", "ref": [4500, 6500], "materiaal": 0},
+      {"id": "koerier-eigen-bus", "naam": "Koerier Eigen Bus", "eenheid": "uur", "ref": [4000, 6000], "materiaal": 0},
+      {"id": "heftruckchauffeur", "naam": "Heftruckchauffeur", "eenheid": "uur", "ref": [3200, 4500], "materiaal": 0},
+      {"id": "logistiek-planner", "naam": "Logistiek Planner", "eenheid": "uur", "ref": [4500, 6500], "materiaal": 0}
   ] },
-  { "id": "installatie", "naam": "Installatie & Elektra", "subs": [
-      {"id": "elektra", "naam": "Elektra aanleggen", "eenheid": "m2", "ref": [4000, 7000], "materiaal": 0.6},
-      {"id": "loodgieter", "naam": "Loodgieterswerk", "eenheid": "m2", "ref": [3500, 6500], "materiaal": 0.5},
-      {"id": "cv", "naam": "CV & verwarming", "eenheid": "m2", "ref": [4500, 8000], "materiaal": 0.8},
-      {"id": "vloerverwarming", "naam": "Vloerverwarming", "eenheid": "m2", "ref": [3500, 6000], "materiaal": 0.9}
+  { "id": "it", "naam": "IT, Software & AI", "subs": [
+      {"id": "web-developer", "naam": "Web Developer", "eenheid": "uur", "ref": [6000, 9500], "materiaal": 0},
+      {"id": "systeembeheerder", "naam": "Systeembeheerder", "eenheid": "uur", "ref": [5000, 8000], "materiaal": 0},
+      {"id": "data-ai-specialist", "naam": "Data & AI Specialist", "eenheid": "uur", "ref": [7500, 12000], "materiaal": 0},
+      {"id": "cybersecurity", "naam": "Cybersecurity", "eenheid": "uur", "ref": [8000, 13000], "materiaal": 0}
   ] },
-  { "id": "logistiek", "naam": "Logistiek", "subs": [
-      {"id": "chauffeur", "naam": "Chauffeur C/CE", "eenheid": "uur", "ref": [4500, 6500], "materiaal": 0},
-      {"id": "koerier", "naam": "Koerier en bezorging", "eenheid": "uur", "ref": [3500, 5000], "materiaal": 0},
-      {"id": "magazijn", "naam": "Magazijn en orderpicken", "eenheid": "uur", "ref": [3000, 4200], "materiaal": 0},
-      {"id": "heftruck", "naam": "Heftruckchauffeur", "eenheid": "uur", "ref": [3200, 4500], "materiaal": 0}
+  { "id": "zakelijk", "naam": "Zakelijke Dienstverlening & Finance", "subs": [
+      {"id": "boekhouder-administrateur", "naam": "Boekhouder / Administrateur", "eenheid": "uur", "ref": [4000, 6500], "materiaal": 0},
+      {"id": "hr-interim", "naam": "HR Interim", "eenheid": "uur", "ref": [6000, 9000], "materiaal": 0},
+      {"id": "projectmanager", "naam": "Projectmanager", "eenheid": "uur", "ref": [7000, 11000], "materiaal": 0},
+      {"id": "sales-marketing", "naam": "Sales & Marketing", "eenheid": "uur", "ref": [5500, 9000], "materiaal": 0}
   ] },
-  { "id": "schoonmaak", "naam": "Schoonmaak", "subs": [
-      {"id": "opleveren", "naam": "Opleverschoonmaak", "eenheid": "m2", "ref": [250, 450], "materiaal": 0.1},
-      {"id": "kantoor", "naam": "Kantoorschoonmaak", "eenheid": "m2", "ref": [200, 350], "materiaal": 0.1},
-      {"id": "glas", "naam": "Glasbewassing", "eenheid": "m2", "ref": [150, 300], "materiaal": 0.1},
-      {"id": "industrieel", "naam": "Industriële schoonmaak", "eenheid": "m2", "ref": [400, 700], "materiaal": 0.15}
+  { "id": "zorg", "naam": "Zorg & Welzijn", "subs": [
+      {"id": "verzorgende-ig", "naam": "Verzorgende IG", "eenheid": "uur", "ref": [3500, 4800], "materiaal": 0},
+      {"id": "verpleegkundige", "naam": "Verpleegkundige", "eenheid": "uur", "ref": [4200, 6000], "materiaal": 0},
+      {"id": "thuiszorg", "naam": "Thuiszorg", "eenheid": "uur", "ref": [3200, 4500], "materiaal": 0},
+      {"id": "begeleider", "naam": "Begeleider", "eenheid": "uur", "ref": [3200, 4500], "materiaal": 0}
   ] },
-  { "id": "ict", "naam": "ICT", "subs": [
-      {"id": "web", "naam": "Webontwikkeling", "eenheid": "uur", "ref": [6000, 9500], "materiaal": 0},
-      {"id": "netwerk", "naam": "Netwerk en beheer", "eenheid": "uur", "ref": [5000, 8000], "materiaal": 0},
-      {"id": "support", "naam": "Support en helpdesk", "eenheid": "uur", "ref": [4000, 6000], "materiaal": 0},
-      {"id": "cloud", "naam": "Data en cloud", "eenheid": "uur", "ref": [7000, 11000], "materiaal": 0}
-  ] },
-  { "id": "tuin", "naam": "Tuin & Bestrating", "subs": [
-      {"id": "bestrating", "naam": "Bestrating en straatwerk", "eenheid": "m2", "ref": [3000, 5500], "materiaal": 0.9},
-      {"id": "tuinaanleg", "naam": "Tuinaanleg", "eenheid": "m2", "ref": [3500, 6500], "materiaal": 0.8},
-      {"id": "gazon", "naam": "Gazon aanleggen", "eenheid": "m2", "ref": [800, 1500], "materiaal": 0.4},
-      {"id": "schutting", "naam": "Schutting en afrastering", "eenheid": "m2", "ref": [2500, 4500], "materiaal": 0.9},
-      {"id": "terras", "naam": "Terras en oprit", "eenheid": "m2", "ref": [3500, 6000], "materiaal": 0.9},
-      {"id": "tuinonderhoud", "naam": "Tuinonderhoud en snoeiwerk", "eenheid": "uur", "ref": [3500, 5000], "materiaal": 0}
-  ] },
-  { "id": "dak", "naam": "Dak & Isolatie", "subs": [
-      {"id": "dakbedekking", "naam": "Dakbedekking", "eenheid": "m2", "ref": [4000, 7500], "materiaal": 0.7},
-      {"id": "dakisolatie", "naam": "Dakisolatie", "eenheid": "m2", "ref": [2500, 5000], "materiaal": 0.9},
-      {"id": "spouwmuur", "naam": "Spouwmuurisolatie", "eenheid": "m2", "ref": [1200, 2500], "materiaal": 0.8},
-      {"id": "vloerisolatie", "naam": "Vloerisolatie", "eenheid": "m2", "ref": [1500, 3000], "materiaal": 0.9},
-      {"id": "gevelwerk", "naam": "Gevelisolatie en gevelwerk", "eenheid": "m2", "ref": [3500, 6500], "materiaal": 0.8},
-      {"id": "zonnepanelen", "naam": "Zonnepanelen plaatsen", "eenheid": "uur", "ref": [4500, 7000], "materiaal": 0}
-  ] },
-  { "id": "horeca", "naam": "Horeca & Facilitair", "subs": [
-      {"id": "kok", "naam": "Kok", "eenheid": "uur", "ref": [4500, 6500], "materiaal": 0},
-      {"id": "bediening", "naam": "Bediening", "eenheid": "uur", "ref": [3000, 4200], "materiaal": 0},
-      {"id": "bar", "naam": "Barista en barmedewerker", "eenheid": "uur", "ref": [3200, 4500], "materiaal": 0},
-      {"id": "keukenhulp", "naam": "Keukenhulp en afwas", "eenheid": "uur", "ref": [2800, 3800], "materiaal": 0},
-      {"id": "facilitair", "naam": "Facilitair medewerker", "eenheid": "uur", "ref": [3200, 4800], "materiaal": 0},
-      {"id": "catering", "naam": "Evenement en catering", "eenheid": "uur", "ref": [4000, 6000], "materiaal": 0}
-  ] },
-  { "id": "techniek", "naam": "Techniek & Metaal", "subs": [
-      {"id": "lassen", "naam": "Lassen", "eenheid": "uur", "ref": [5500, 8000], "materiaal": 0},
-      {"id": "machinemonteur", "naam": "Monteur machines", "eenheid": "uur", "ref": [5000, 7500], "materiaal": 0},
-      {"id": "cnc", "naam": "CNC en draaien", "eenheid": "uur", "ref": [5500, 8500], "materiaal": 0},
-      {"id": "constructie", "naam": "Constructiewerk", "eenheid": "uur", "ref": [5000, 7500], "materiaal": 0},
-      {"id": "storing", "naam": "Storingsmonteur", "eenheid": "uur", "ref": [5000, 7500], "materiaal": 0},
-      {"id": "plaatwerk", "naam": "Plaatwerk", "eenheid": "uur", "ref": [5200, 7800], "materiaal": 0}
+  { "id": "schoonmaak", "naam": "Schoonmaak & Facilitair", "subs": [
+      {"id": "zakelijke-schoonmaak", "naam": "Zakelijke Schoonmaak", "eenheid": "m2", "ref": [200, 350], "materiaal": 0.1},
+      {"id": "glasbewassing", "naam": "Glasbewassing", "eenheid": "m2", "ref": [150, 300], "materiaal": 0.1},
+      {"id": "hovenier-groenonderhoud", "naam": "Hovenier & Groenonderhoud", "eenheid": "uur", "ref": [3500, 5000], "materiaal": 0}
   ] }
  ]
 }

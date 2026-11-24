@@ -3,15 +3,12 @@
   'use strict';
   var U = window.ZUI, Z = window.ZZP, G = window.ZZPGEO, h = U.h, $ = U.$, eur = U.eur;
   var DK = 'zzp_wiz_v1', step = 1, W = null, me = null;
-  var S = { cat: '', sub: '', aantal: 100, kamers: 1, materiaal: 'exclusief', spoed: false, fotos: [], titel: '', omschrijving: '', postcode: '', tot: '', dba: false };
-  var geo = null, geoT = null;
-  try { var d = JSON.parse(localStorage.getItem(DK)); if (d) { Object.assign(S, d.S || {}); step = Math.min(4, Math.max(1, d.step || 1)); } } catch (e) { }
+  var S = { cat: '', sub: '', aantal: 100, kamers: 1, materiaal: 'exclusief', spoed: false, fotos: [], titel: '', omschrijving: '', region: '', dba: false };
+    try { var d = JSON.parse(localStorage.getItem(DK)); if (d) { Object.assign(S, d.S || {}); step = Math.min(4, Math.max(1, d.step || 1)); } } catch (e) { }
   var save = function () { try { localStorage.setItem(DK, JSON.stringify({ S: S, step: step })); } catch (e) { } };
   var cat = function () { return W.categorieen.filter(function (c) { return c.naam === S.cat; })[0]; };
   var sub = function () { var c = cat(); return c && c.subs.filter(function (s) { return s.naam === S.sub; })[0]; };
   var body = $('wz-body');
-  var in30 = function () { return new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10); };
-  if (!S.tot) S.tot = in30();
 
   var TITELS = [['Wat voor klus heeft u?', 'Kies eerst de hoofdcategorie.'], ['Welke klus precies?', ''], ['Vertel iets over de klus', 'Oppervlak, ruimtes, materiaal en foto\'s.'], ['Budget en publiceren', 'Controleer de richtbegroting en publiceer met uw KvK-nummer.']];
 
@@ -64,53 +61,54 @@
     return h('div', { class: 'upl' }, h('span', { class: 'hint', style: 'font-weight:600' }, 'Foto\'s van de klus (optioneel, maximaal 3)'), h('div', { class: 'btns' }, h('button', { type: 'button', class: 'mini', text: 'Foto toevoegen', onclick: function () { inp.click(); } })), inp, th, er);
   }
   function s4() {
-    var s = sub(); if (!s) return go(2); var b = bereken();
-    var plaatsTxt = h('span', { class: 'hint' }), er = h('p', { class: 'err', role: 'alert' });
-    if (!S.titel) S.titel = s.naam + ' ' + S.aantal + ' ' + (s.eenheid === 'uur' ? 'uur' : 'm²');
-    function checkPc() { var v = pcI.value; S.postcode = v; save(); clearTimeout(geoT); geo = null; if (!G.geldig(v) || G.norm(v).length < 6) { plaatsTxt.className = 'hint'; plaatsTxt.textContent = 'Vul een volledige postcode in (bijvoorbeeld 7811 AB).'; return; } plaatsTxt.textContent = 'Opzoeken…'; geoT = setTimeout(function () { G.zoek(v).then(function (o) { geo = o; plaatsTxt.className = o ? 'pcok' : 'pcnok'; plaatsTxt.textContent = o ? '✓ ' + o.plaats + ' (' + o.provincie + ')' : 'Postcode niet gevonden of geen verbinding.'; }); }, 300); }
-    var pcI = h('input', { value: S.postcode, maxlength: '7', placeholder: '7811 AB', autocomplete: 'postal-code', inputmode: 'text', required: 'required' }); pcI.addEventListener('input', checkPc);
+    var s = sub(); if (!s) return go(2); var bg = bereken(), eh = s.eenheid === 'uur' ? 'uur' : 'm²';
+    var er = h('p', { class: 'err', role: 'alert' });
+    if (!S.titel) S.titel = s.naam + ' ' + S.aantal + ' ' + eh;
+    var regI = h('select', { required: 'required', 'aria-label': 'Regio' }); regI.appendChild(h('option', { value: '', text: 'Kies een regio' }));
+    W.regios.forEach(function (r) { regI.appendChild(h('option', { value: r, text: r })); }); regI.value = S.region || ''; regI.addEventListener('input', function () { S.region = regI.value; save(); });
     var titelI = h('input', { value: S.titel, maxlength: '100' }); titelI.addEventListener('input', function () { S.titel = titelI.value; save(); });
     var omI = h('textarea', { maxlength: '2000', placeholder: 'Beschrijf kort wat er moet gebeuren, de staat van de ruimte en wanneer u wilt starten.' }); omI.value = S.omschrijving; omI.addEventListener('input', function () { S.omschrijving = omI.value; save(); });
-    var totI = h('input', { type: 'date', value: S.tot, min: new Date().toISOString().slice(0, 10) }); totI.addEventListener('input', function () { S.tot = totI.value; save(); });
     var dbaC = h('input', { type: 'checkbox', checked: S.dba ? 'checked' : false }); dbaC.addEventListener('change', function () { S.dba = dbaC.checked; save(); });
     var kvk = h('div', { class: 'kvkbox' });
     if (!me) { kvk.appendChild(h('span', null, 'Voor publiceren is een account met geldig KvK-nummer nodig.')); kvk.appendChild(h('a', { class: 'btn pill', href: 'account.html?terug=plaatsen.html', text: 'Inloggen of registreren' })); }
-    else if (me.profile.rol !== 'opdrachtgever') { kvk.appendChild(h('span', { class: 'err', text: 'U bent ingelogd als ZZP\'er. Alleen opdrachtgevers kunnen een klus plaatsen.' })); }
-    else { kvk.appendChild(h('span', null, h('b', { text: me.profile.bedrijf }), ' · KvK ' + me.profile.kvk)); kvk.appendChild(U.badge(me.profile.kvk_geverifieerd)); }
-    var lines = [h('li', { text: 'Arbeid (referentie 100 ' + (s.eenheid === 'uur' ? 'uur' : 'm²') + ' × ' + (b.factor).toFixed(2).replace('.', ',') + (b.kamerFactor > 1 ? ' × ' + b.kamerFactor.toFixed(2).replace('.', ',') + ' ruimtes' : '') + '): ' + eur(b.arbeid[0]) + ' – ' + eur(b.arbeid[1]) })];
-    if (S.materiaal === 'inclusief' && s.materiaal) lines.push(h('li', { text: 'Materiaal inbegrepen: + ' + eur(b.materiaal[0]) + ' – ' + eur(b.materiaal[1]) }));
+    else if (me.profile.role !== 'opdrachtgever') { kvk.appendChild(h('span', { class: 'err', text: 'U bent ingelogd als ZZP\'er. Alleen opdrachtgevers kunnen een klus plaatsen.' })); }
+    else { kvk.appendChild(h('span', null, h('b', { text: me.profile.company_name }), ' · KvK ' + me.profile.kvk_number)); kvk.appendChild(U.badge(me.profile)); }
+    var lines = [h('li', { text: 'Arbeid (referentie 100 ' + eh + ' × ' + (bg.factor).toFixed(2).replace('.', ',') + (bg.kamerFactor > 1 ? ' × ' + bg.kamerFactor.toFixed(2).replace('.', ',') + ' ruimtes' : '') + '): ' + eur(bg.arbeid[0]) + ' – ' + eur(bg.arbeid[1]) })];
+    if (S.materiaal === 'inclusief' && s.materiaal) lines.push(h('li', { text: 'Materiaal inbegrepen: + ' + eur(bg.materiaal[0]) + ' – ' + eur(bg.materiaal[1]) }));
     if (S.spoed) lines.push(h('li', { text: 'Spoedtoeslag (48 uur): + ' + Math.round(W.spoedToeslag * 100) + '%' }));
     body.appendChild(h('div', { class: 'fgrid' },
-      h('div', { class: 'budget' }, h('small', { text: 'Richtbegroting op basis van een vaste referentie van 100 ' + (s.eenheid === 'uur' ? 'uur' : 'm²') }), h('span', { class: 'big' }, h('em', { text: eur(b.min) }), ' – ' + eur(b.max)), h('ul', null, lines), h('small', { text: 'Indicatie, excl. btw. Geen offerte; ZZP\'ers reageren met hun eigen bedrag.' })),
+      h('div', { class: 'budget' }, h('small', { text: 'Richtbegroting op basis van een vaste referentie van 100 ' + eh }), h('span', { class: 'big' }, h('em', { text: eur(bg.min) }), ' – ' + eur(bg.max)), h('ul', null, lines), h('small', { text: 'Indicatie, excl. btw. Geen offerte; ZZP\'ers reageren met hun eigen bedrag.' })),
       h('a', { class: 'mini', href: 'werkplan.html?draft=1', target: '_blank', rel: 'noopener', text: 'Download werkplan en begroting (PDF)', style: 'justify-self:start' }),
       h('label', null, 'Titel van de klus', titelI),
-      h('div', { class: 'row2' }, h('label', null, 'Postcode van de klus', pcI, plaatsTxt), h('label', null, 'Sluitingsdatum', totI)),
+      h('label', null, 'Regio', regI),
       h('label', null, 'Omschrijving', omI),
+      S.fotos.length ? h('p', { class: 'hint', text: 'Uw ' + S.fotos.length + ' foto\'s komen in het werkplan (PDF). Ze worden niet online bij de klus bewaard.' }) : null,
       h('div', { class: 'dba' }, h('h3', { text: 'Wet DBA-controle' }),
         h('ul', null, h('li', { text: 'De ZZP\'er bepaalt zelf hoe het werk wordt uitgevoerd (geen gezag of instructies zoals bij een werknemer).' }), h('li', { text: 'De ZZP\'er mag zich laten vervangen en werkt voor eigen rekening en risico.' }), h('li', { text: 'De opdracht is resultaatgericht en geen verkapt dienstverband.' })),
         h('p', { class: 'hint' }, 'Dit is geen juridisch advies. Raadpleeg bij twijfel de ', h('a', { href: 'https://www.belastingdienst.nl', target: '_blank', rel: 'noopener', text: 'Belastingdienst' }), '.'),
         h('label', { class: 'check' }, dbaC, h('span', { text: 'Ik heb de punten gelezen en bevestig dat deze opdracht naar mijn beste weten geen verkapt dienstverband is.' }))),
       kvk, er));
-    if (S.postcode) checkPc();
-    s4.er = er; s4.get = function () { return { titelI: titelI, omI: omI, totI: totI, dbaC: dbaC, pcI: pcI }; };
+    s4.er = er; s4.get = function () { return { titelI: titelI, omI: omI, dbaC: dbaC, regI: regI }; };
   }
 
   function publiceer() {
-    var s = sub(), b = bereken(), g = s4.get(), er = s4.er, btn = $('wz-next'); er.textContent = '';
+    var s = sub(), bg = bereken(), g = s4.get(), er = s4.er, btn = $('wz-next'); er.textContent = '';
     var vind = function (m) { er.textContent = m; er.scrollIntoView({ block: 'center', behavior: 'smooth' }); };
     if (!me) return vind('Log eerst in of registreer als opdrachtgever met een geldig KvK-nummer.');
-    if (me.profile.rol !== 'opdrachtgever') return vind('Alleen opdrachtgevers kunnen een klus plaatsen.');
-    if (!Z.kvkGeldig(me.profile.kvk)) return vind('Plaatsen is geblokkeerd: uw KvK-nummer is ongeldig.');
-    if (!G.geldig(g.pcI.value) || G.norm(g.pcI.value).length < 6) return vind('Vul een geldige postcode in (bijvoorbeeld 7811 AB).');
+    if (me.profile.role !== 'opdrachtgever') return vind('Alleen opdrachtgevers kunnen een klus plaatsen.');
+    if (!Z.kvkGeldig(me.profile.kvk_number)) return vind('Plaatsen is geblokkeerd: uw KvK-nummer is ongeldig.');
+    if (!g.regI.value) return vind('Kies een regio.');
     if (g.omI.value.trim().length < 20) return vind('Schrijf een omschrijving van minimaal 20 tekens.');
     if (!g.dbaC.checked) return vind('Bevestig de Wet DBA-controle om te publiceren.');
+    var eh = s.eenheid === 'uur' ? 'uur' : 'm²';
+    var duur = [S.aantal + ' ' + eh, s.eenheid === 'm2' && S.kamers > 1 ? S.kamers + ' ruimtes' : null, s.materiaal && S.materiaal === 'inclusief' ? 'materiaal inclusief' : null, S.spoed ? 'Spoedklus binnen 48 uur' : null].filter(Boolean).join(' · ');
+    var beschr = g.omI.value.trim() + '\n\nRichtbegroting (referentie 100 ' + eh + '): ' + eur(bg.min) + ' – ' + eur(bg.max) + ' excl. btw.\nWet DBA-controle bevestigd door opdrachtgever.';
     btn.disabled = true; btn.textContent = 'Publiceren…';
-    G.zoek(g.pcI.value).then(function (o) {
-      if (!o) { btn.disabled = false; btn.textContent = 'Klus publiceren'; return vind('Postcode niet gevonden of geen verbinding. Probeer het opnieuw.'); }
-      return Z.createListing({ titel: g.titelI.value, categorie: S.cat, subklus: S.sub, eenheid: s.eenheid, oppervlak: S.aantal, kamers: S.kamers, materiaal: s.materiaal ? S.materiaal : 'exclusief', spoed: S.spoed, budget_min: b.min, budget_max: b.max,
-        postcode: G.norm(g.pcI.value), plaats: o.plaats, provincie: o.provincie, lat: o.lat, lon: o.lon, omschrijving: g.omI.value, fotos: S.fotos, dba_bevestigd: true, valid_through: g.totI.value })
-        .then(function (l) { try { localStorage.removeItem(DK); } catch (e) { } location.href = 'ilan.html?id=' + l.id; });
-    }).catch(function (e) { btn.disabled = false; btn.textContent = 'Klus publiceren'; vind(e.message); });
+    Z.createJob({ title: g.titelI.value, category: S.cat, subcategory: S.sub, region: g.regI.value, rate_type: 'project', rate_value: Math.round((bg.min + bg.max) / 2 / 10) * 10, duration: duur, description: beschr })
+      .then(function (j) {
+        try { localStorage.setItem('zzp_plan_' + j.id, JSON.stringify({ S: S, region: g.regI.value, dba: true })); localStorage.removeItem(DK); } catch (e) { }
+        location.href = 'ilan.html?id=' + j.id;
+      }).catch(function (e) { btn.disabled = false; btn.textContent = 'Klus publiceren'; vind(e.message); });
   }
 
   function render() {
