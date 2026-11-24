@@ -2,8 +2,9 @@
 // Stuurt een ingelogde gebruiker NOOIT terug naar de inlogpagina; ontbreekt het profiel, dan opent bovenaan "Profiel & KvK voltooien".
 (function () {
   'use strict';
-  var U = window.ZUI, Z = window.ZZP, G = window.ZZPGEO, h = U.h, $ = U.$, eur = U.eur, datum = U.datum, badge = U.badge, trust = U.trust, naam = U.naam, REMOTE = U.REMOTE_REGIO;
+  var U = window.ZUI, Z = window.ZZP, G = window.ZZPGEO, h = U.h, $ = U.$, eur = U.eur, datum = U.datum, badge = U.badge, trust = U.trust, spec = U.spec, naam = U.naam, REMOTE = U.REMOTE_REGIO;
   var root = $('dash'), TABS = [['overzicht', 'Overzicht'], ['profiel', 'Profiel & KvK bewerken'], ['klussen', 'Mijn klussen & sollicitaties'], ['tools', 'Werkplan & Tarief Tools']];
+  var CERTS = ['VCA', 'NEN 3140', 'AVB', 'BHV'];
   var matchRegio = function (sel, r) { return !sel || r === sel || r === REMOTE; };
   var msg = function (cls, t) { return h('p', { class: cls, role: cls === 'err' ? 'alert' : 'status', text: t || '' }); };
   var initials = function (n) { return (n || '?').trim().split(/\s+/).slice(0, 2).map(function (x) { return x.charAt(0).toUpperCase(); }).join(''); };
@@ -101,6 +102,10 @@
       h('div', { class: 'row2' }, h('label', null, 'Regio', sel('region', p.region, W.regios, 'Kies een regio')), veld('Postcode', 'pc', { value: ex.pc || '', maxlength: '7', placeholder: '7811 AB', autocomplete: 'postal-code' })),
       rate,
       h('div', { class: 'fgrid', style: 'gap:2px' }, h('span', { class: 'hint', style: 'font-weight:700' }, 'Zekerheid (zelf verklaard)'), chk('vca', 'VCA-certificaat', b.vca), chk('avb', 'AVB-bedrijfsaansprakelijkheidsverzekering', b.avb), chk('dba', 'Modelovereenkomst (Wet DBA)', b.dba)),
+      h('div', { class: 'fgrid', style: 'gap:2px' }, h('span', { class: 'hint', style: 'font-weight:700' }, 'Specialisaties & Referenties (zelf verklaard)'),
+        h('label', null, 'Aantal voltooide opdrachten', h('input', { name: 'done', type: 'number', min: '0', max: '9999', step: '1', inputmode: 'numeric', value: ex.done || '' })),
+        h('div', { class: 'pillrow', role: 'group', 'aria-label': 'Certificaten' }, CERTS.map(function (c) { return h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'cert', value: c, checked: (ex.certs || []).indexOf(c) >= 0 ? 'checked' : false }), c); })),
+        h('label', null, 'Referentienotitie (bijv. tevreden opdrachtgever, max. 200 tekens)', h('input', { name: 'ref', maxlength: '200', value: ex.ref || '' }))),
       h('label', null, 'Korte introductie (bio)', h('textarea', { name: 'bio', maxlength: '600', style: 'min-height:90px', text: p.bio || '' })),
       er, ok, h('button', { class: 'btn pill', type: 'submit', text: 'Opslaan' }));
     f.addEventListener('submit', function (e) {
@@ -112,11 +117,20 @@
       if (!q.category.value || !q.region.value) { er.textContent = 'Kies een categorie en een regio.'; return; }
       var bt = f.querySelector('button[type=submit]'); bt.disabled = true;
       Z.updateProfile({ role: role, full_name: q.full_name.value, company_name: q.company_name.value, kvk_number: kvk, category: q.category.value, region: q.region.value, hourly_rate: role === 'zzp' ? q.hourly_rate.value : null,
-        bio: q.bio.value, badges: { vca: q.vca.checked, avb: q.avb.checked, dba: q.dba.checked }, extra: { btw: btw, sub: q.sub.value, pc: pc } })
+        bio: q.bio.value, badges: { vca: q.vca.checked, avb: q.avb.checked, dba: q.dba.checked }, extra: { btw: btw, sub: q.sub.value, pc: pc, done: q.done.value, certs: Array.prototype.filter.call(f.querySelectorAll('input[name=cert]'), function (c) { return c.checked; }).map(function (c) { return c.value; }), ref: q.ref.value.trim() } })
         .then(function () { return Z.rawProfile(); }).then(function (np) { st.p = np; ok.textContent = 'Opgeslagen.'; bt.disabled = false; })
         .catch(function (x) { er.textContent = x.message; bt.disabled = false; });
     });
-    main.appendChild(f);
+    main.appendChild(f); main.appendChild(privacyCard(st));
+  }
+
+  /* ---------- AVG: eigen gegevens downloaden of verwijderen ---------- */
+  function privacyCard(st) {
+    var er = msg('err'), ok = msg('okmsg');
+    return h('div', { class: 'dcard', id: 'gegevens' }, h('h2', { text: 'Mijn gegevens (AVG)' }), h('p', { class: 'hint', text: 'U kunt uw gegevens downloaden als JSON-bestand of uw account definitief verwijderen (Gegevens verwijderen).' }),
+      h('div', { class: 'cta' },
+        h('button', { class: 'btn ghost', type: 'button', text: 'Gegevens downloaden (JSON)', onclick: function () { er.textContent = ''; Z.exportData().then(function (d) { var a = h('a', { href: URL.createObjectURL(new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' })), download: 'atas-zzp-mijn-gegevens.json' }); document.body.appendChild(a); a.click(); a.remove(); ok.textContent = 'Uw gegevens zijn gedownload.'; }).catch(function (x) { er.textContent = x.message; }); } }),
+        h('button', { class: 'btn ghost danger', type: 'button', text: 'Gegevens verwijderen', onclick: function () { er.textContent = ''; if (!confirm('Weet u het zeker? Uw account, profiel, klussen en reacties worden definitief verwijderd. Dit kan niet ongedaan worden gemaakt.')) return; Z.deleteAccount().then(function () { location.href = 'index.html'; }).catch(function (x) { er.textContent = x.message; }); } })), er, ok);
   }
 
   /* ---------- 3. Mijn klussen & sollicitaties ---------- */
@@ -134,9 +148,24 @@
             h('div', { class: 'cta' },
               h('button', { class: 'mini', type: 'button', text: 'Aanmeldingen (' + j.aanmeldingen + ')', onclick: function () { if (ex.getAttribute('data-k')) { ex.textContent = ''; ex.removeAttribute('data-k'); return; } ex.setAttribute('data-k', '1'); toonAanm(j, ex); } }),
               h('button', { class: 'mini', type: 'button', text: j.status === 'open' ? 'Sluiten' : 'Heropenen', onclick: function () { Z.updateJob(j.id, { status: j.status === 'open' ? 'closed' : 'open' }).then(laad); } }),
+              h('button', { class: 'mini', type: 'button', text: 'Offertes vergelijken', onclick: function () { if (ex.getAttribute('data-k') === 'v') { ex.textContent = ''; ex.removeAttribute('data-k'); return; } ex.setAttribute('data-k', 'v'); vergelijk(j, ex); } }),
               h('a', { class: 'mini', href: 'ilan.html?id=' + j.id, text: 'Bekijken' }), h('a', { class: 'mini', href: 'werkplan.html?id=' + j.id, text: 'Werkplan (PDF)' })), ex));
         });
       }).catch(function (e) { lijst.textContent = ''; lijst.appendChild(msg('err', e.message)); });
+    }
+    function vergelijk(j, ex) {
+      ex.textContent = ''; Z.jobApplications(j.id).then(function (a) {
+        if (!a.length) { ex.appendChild(h('p', { class: 'note', text: 'Nog geen offertes om te vergelijken.' })); return; }
+        a = a.slice().sort(function (x, y) { return (x.proposed_rate == null) - (y.proposed_rate == null) || x.proposed_rate - y.proposed_rate; });
+        var min = a.filter(function (x) { return x.proposed_rate != null; })[0];
+        var jn = function (v) { return v ? 'Ja' : '–'; }, kv = function (pr) { return pr && Z.kvkGeldig(pr.kvk_number) ? 'Ja' : '–'; };
+        var tb = h('table', { class: 'prijst vgl' }, h('caption', { class: 'sr', text: 'Offertes voor ' + j.title }), h('thead', null, h('tr', null, ['ZZP\'er', 'Prijs (€ excl. btw)', 'KvK', 'VCA', 'AVB', 'Regio', 'Opdrachten'].map(function (t) { return h('th', { scope: 'col', text: t }); }))));
+        var body = h('tbody'); a.forEach(function (x) {
+          var pr = x.profiles || {}, b = pr.badges || {}, e = pr.extra || {};
+          body.appendChild(h('tr', { class: min && x.id === min.id ? 'best' : '' }, h('th', { scope: 'row', text: naam(pr) || '—' }), h('td', { 'data-l': 'Prijs', text: x.proposed_rate != null ? eur(x.proposed_rate) + (min && x.id === min.id ? ' · laagste' : '') : 'In overleg' }), h('td', { 'data-l': 'KvK', text: kv(pr) }), h('td', { 'data-l': 'VCA', text: jn(b.vca) }), h('td', { 'data-l': 'AVB', text: jn(b.avb) }), h('td', { 'data-l': 'Regio', text: pr.region || '—' }), h('td', { 'data-l': 'Opdrachten', text: e.done ? String(e.done) : '—' })));
+        });
+        tb.appendChild(body); ex.appendChild(h('div', { class: 'tscroll' }, tb)); ex.appendChild(h('p', { class: 'hint', text: 'KvK, VCA en AVB zijn zelf verklaard door de ZZP\'er; Atas Group controleert deze niet automatisch.' }));
+      }).catch(function (e) { ex.appendChild(msg('err', e.message)); });
     }
     function toonAanm(j, ex) {
       ex.textContent = ''; Z.jobApplications(j.id).then(function (a) {
@@ -144,10 +173,10 @@
         a.forEach(function (x) {
           var pr = x.profiles || {}, mail = contactMail(x), er = msg('err');
           var acc = h('button', { class: 'btn pill', type: 'button', text: x.status === 'accepted' ? 'Geaccepteerd ✓' : 'Accepteren', disabled: x.status === 'accepted' ? 'disabled' : false });
-          acc.addEventListener('click', function () { acc.disabled = true; Z.updateApplication(x.id, { status: 'accepted' }).then(function () { toonAanm(j, ex); }).catch(function (e) { acc.disabled = false; er.textContent = e.message; }); });
-          ex.appendChild(h('div', { class: 'app' }, h('div', { class: 'jt' }, h('b', { text: (pr.full_name || '') + ' · ' + (pr.company_name || '') }), schip(x.status || 'pending')), h('div', { class: 'trustrow' }, badge(pr), trust(pr)),
+          acc.addEventListener('click', function () { acc.disabled = true; var win = window.open('', '_blank'); Z.updateApplication(x.id, { status: 'accepted' }).then(function () { x.status = 'accepted'; bevestiging(st, j, x, win); toonAanm(j, ex); }).catch(function (e) { acc.disabled = false; er.textContent = e.message; }); });
+          ex.appendChild(h('div', { class: 'app' }, h('div', { class: 'jt' }, h('b', { text: (pr.full_name || '') + ' · ' + (pr.company_name || '') }), schip(x.status || 'pending')), h('div', { class: 'trustrow' }, badge(pr), trust(pr)), spec(pr),
             h('span', { class: 'rate', text: x.proposed_rate != null ? 'Bod: ' + eur(x.proposed_rate) : 'Geen bedrag opgegeven' }), h('span', { class: 'meta', text: 'KvK ' + (pr.kvk_number || '') + ' · ' + datum(x.created_at) }), h('p', { class: 'bericht', text: x.message }),
-            h('div', { class: 'cta' }, acc, x.status === 'accepted' ? h('a', { class: 'btn wa', href: waLink(x, j, pr), target: '_blank', rel: 'noopener', text: 'Contact via WhatsApp' }) : null, mail ? h('a', { class: 'btn ghost', href: 'mailto:' + mail + '?subject=' + encodeURIComponent('Uw reactie op: ' + j.title), text: 'Contact opnemen' }) : h('span', { class: 'hint', text: 'Geen e-mailadres opgegeven' })), er));
+            h('div', { class: 'cta' }, acc, x.status === 'accepted' ? h('button', { class: 'btn ghost', type: 'button', text: 'Opdrachtbevestiging (PDF)', onclick: function () { bevestiging(st, j, x, window.open('', '_blank')); } }) : null, x.status === 'accepted' ? h('a', { class: 'btn wa', href: waLink(x, j, pr), target: '_blank', rel: 'noopener', text: 'Contact via WhatsApp' }) : null, mail ? h('a', { class: 'btn ghost', href: 'mailto:' + mail + '?subject=' + encodeURIComponent('Uw reactie op: ' + j.title), text: 'Contact opnemen' }) : h('span', { class: 'hint', text: 'Geen e-mailadres opgegeven' })), er));
         });
       }).catch(function (e) { ex.appendChild(msg('err', e.message)); });
     }
@@ -186,6 +215,30 @@
     laad();
   }
 
+  /* ---------- Opdrachtbevestiging (Modelovereenkomst) als printbaar document ---------- */
+  function bevestiging(st, j, a, win) {
+    var o = st.p, z = a.profiles || {}, e = function (t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
+    var d = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }), nr = 'OB-' + new Date().getFullYear() + '-' + String(a.id || j.id).replace(/[^a-z0-9]/gi, '').slice(0, 6).toUpperCase();
+    var bedrag = a.proposed_rate != null ? eur(a.proposed_rate) + ' excl. btw (21% btw: ' + eur(a.proposed_rate * 0.21) + '; totaal ' + eur(a.proposed_rate * 1.21) + ')' : 'In onderling overleg vast te stellen';
+    var bd = z.badges || {}, verkl = [bd.vca ? 'VCA' : '', bd.avb ? 'AVB' : ''].filter(Boolean).join(', ');
+    var html = '<!doctype html><html lang="nl-NL"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Opdrachtbevestiging ' + e(nr) + '</title><style>' +
+      'body{font:15px/1.55 "Segoe UI",system-ui,Arial,sans-serif;color:#111827;max-width:780px;margin:0 auto;padding:28px 20px}h1{font-size:1.6rem;margin:0 0 4px}h2{font-size:1.02rem;margin:22px 0 6px;border-bottom:2px solid #F36F21;padding-bottom:4px}' +
+      'table{width:100%;border-collapse:collapse}td,th{text-align:left;vertical-align:top;padding:5px 8px;border-bottom:1px solid #e5e7eb;overflow-wrap:anywhere}th{width:34%;color:#4B5563;font-weight:600}.sig{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:34px}.sig div{border-top:1px solid #111827;padding-top:6px;min-height:70px}' +
+      '.bar{display:flex;gap:10px;margin-bottom:18px}button{font:inherit;font-weight:700;padding:10px 18px;border-radius:99px;border:2px solid #111827;background:#F36F21;color:#111827;cursor:pointer}.small{color:#4B5563;font-size:.82rem}@media print{.bar{display:none}body{padding:0}}@media(max-width:560px){.sig{grid-template-columns:1fr}}</style></head><body>' +
+      '<div class="bar"><button onclick="window.print()">Afdrukken / opslaan als PDF</button></div>' +
+      '<h1>Opdrachtbevestiging</h1><p class="small">Modelovereenkomst-bevestiging &middot; nr. ' + e(nr) + ' &middot; ' + e(d) + '</p>' +
+      '<h2>1. Partijen</h2><table><tr><th>Opdrachtgever</th><td>' + e(naam(o)) + ' (' + e(o.full_name) + ')<br>KvK ' + e(o.kvk_number) + (o.extra && o.extra.btw ? ' &middot; BTW ' + e(o.extra.btw) : '') + '<br>' + e([o.region, st.email].filter(Boolean).join(' · ')) + '</td></tr>' +
+      '<tr><th>Opdrachtnemer (ZZP\'er)</th><td>' + e(naam(z)) + ' (' + e(z.full_name) + ')<br>KvK ' + e(z.kvk_number || '') + (z.extra && z.extra.btw ? ' &middot; BTW ' + e(z.extra.btw) : '') + '<br>' + e([z.region, contactMail(a)].filter(Boolean).join(' · ')) + '</td></tr></table>' +
+      '<h2>2. Opdracht</h2><table><tr><th>Titel</th><td>' + e(j.title) + '</td></tr><tr><th>Soort werk</th><td>' + e([j.category, j.subcategory].filter(Boolean).join(' · ')) + '</td></tr><tr><th>Locatie / regio</th><td>' + e(j.region) + '</td></tr><tr><th>Duur / planning</th><td>' + e(j.duration || 'In overleg') + '</td></tr><tr><th>Omschrijving</th><td>' + e(j.description || '').replace(/\n/g, '<br>') + '</td></tr></table>' +
+      '<h2>3. Tarief</h2><table><tr><th>Overeengekomen bedrag</th><td>' + e(bedrag) + '</td></tr><tr><th>Betaling</th><td>Op factuur van de opdrachtnemer, binnen 14 dagen na ontvangst, tenzij schriftelijk anders overeengekomen.</td></tr></table>' +
+      '<h2>4. Wet DBA &ndash; zelfstandigheid van de opdrachtnemer</h2><p>Partijen verklaren dat de opdrachtnemer als zelfstandige (ZZP\'er) werkt en dat geen sprake is van een gezagsverhouding. De opdrachtnemer bepaalt zelf hoe, wanneer en met welke middelen het werk wordt uitgevoerd, werkt voor eigen rekening en risico met eigen gereedschap en materiaal, mag zich na overleg laten vervangen door een gelijkwaardige vakgenoot en kan voor meerdere opdrachtgevers werken. De opdrachtgever geeft geen instructies over de wijze van uitvoering; er is sprake van een resultaatverplichting. Partijen kunnen deze bevestiging aanvullen met een Modelovereenkomst van de Belastingdienst.</p>' +
+      '<h2>5. Overig</h2><p>Opdrachtnemer staat ingeschreven bij de Kamer van Koophandel en is verantwoordelijk voor eigen belastingen, verzekeringen (waaronder AVB) en eventueel vereiste certificaten. ' + (verkl ? 'Zelf verklaard door opdrachtnemer: ' + e(verkl) + '. ' : '') + 'Op deze overeenkomst is Nederlands recht van toepassing.</p>' +
+      '<p class="small">ATAS ZZP Netwerk (Atas Group, Emmen) is uitsluitend bemiddelingsplatform en geen partij bij deze overeenkomst. Dit document is een hulpmiddel en geen juridisch advies; de gegevens zijn zelf verklaard door partijen.</p>' +
+      '<div class="sig"><div>Opdrachtgever<br><span class="small">Naam, datum en handtekening</span></div><div>Opdrachtnemer<br><span class="small">Naam, datum en handtekening</span></div></div></body></html>';
+    if (!win) { alert('Sta pop-ups toe om de opdrachtbevestiging te openen.'); return; }
+    win.document.open(); win.document.write(html); win.document.close();
+  }
+
   /* ---------- 4. Werkplan & Tarief Tools ---------- */
   function tools(st, main) {
     var W = st.W, out = h('div', { 'aria-live': 'polite' }), cat = sel('cat', '', W.categorieen.map(function (c) { return c.naam; }), 'Kies een categorie'), sub = h('select', { name: 'sub' }, h('option', { value: '', text: 'Kies een soort klus' }));
@@ -204,6 +257,7 @@
       h('div', { class: 'dcard' }, h('h3', { text: '100 m² budget & werkplan' }), h('div', { class: 'fgrid' }, h('label', null, 'Categorie', cat), h('label', null, 'Soort klus', sub), h('label', null, 'Oppervlak (m²) of uren', n), h('label', { class: 'check' }, mat, 'Materiaal inclusief')), out,
         h('div', { class: 'cta' }, h('a', { class: 'btn pill', href: 'plaatsen.html', text: 'Volledige wizard' }), draft ? h('a', { class: 'btn ghost', href: 'werkplan.html?draft=1', text: 'Werkplan (PDF) van uw concept' }) : null)),
       h('div', { class: 'dcard' }, h('h3', { text: 'ZZP Uurtarief Calculator' }), h('p', { class: 'hint', text: 'Bereken uw uurtarief uit netto doelinkomen, kosten, verzekeringen, vakantie en belastingreserve.' }), h('a', { class: 'btn pill', href: 'index.html#calculator', text: 'Open de calculator' })),
+      (function () { var c = h('div', { class: 'dcard' }, h('h3', { text: 'BTW & Netto Kazanç Calculator' }), h('p', { class: 'hint', text: '21% btw, kosten en netto-indicatie van uw uurtarief of projectprijs.' })); var b = h('div', { class: 'fgrid' }); c.appendChild(b); U.nettoCalc(b); return c; })(),
       h('div', { class: 'dcard' }, h('h3', { text: 'Wet DBA & KvK' }), h('p', { class: 'hint', text: 'Lees hoe KvK, VCA, AVB en de Modelovereenkomst werken.' }), h('a', { class: 'btn ghost', href: 'wet-dba-kvk.html', text: 'Lees meer' }))));
   }
 })();

@@ -58,3 +58,26 @@ drop policy if exists applications_update on public.applications;
 create policy applications_update on public.applications for update to authenticated
   using (exists (select 1 from public.jobs j where j.id = job_id and j.owner_id = auth.uid()))
   with check (exists (select 1 from public.jobs j where j.id = job_id and j.owner_id = auth.uid()));
+
+
+-- AVG: gebruikers mogen hun eigen gegevens verwijderen (Gegevens verwijderen in het dashboard)
+drop policy if exists profiles_delete on public.profiles;
+create policy profiles_delete on public.profiles for delete to authenticated using (id = auth.uid());
+drop policy if exists jobs_delete on public.jobs;
+create policy jobs_delete on public.jobs for delete to authenticated using (owner_id = auth.uid());
+drop policy if exists applications_delete on public.applications;
+create policy applications_delete on public.applications for delete to authenticated using (applicant_id = auth.uid());
+grant delete on public.profiles, public.jobs, public.applications to authenticated;
+
+-- verwijdert het volledige account (inclusief inlogaccount) van de ingelogde gebruiker
+create or replace function public.delete_my_account() returns void
+language plpgsql security definer set search_path = public, auth as $$
+begin
+  if auth.uid() is null then raise exception 'Niet ingelogd'; end if;
+  delete from public.applications where applicant_id = auth.uid() or job_id in (select id from public.jobs where owner_id = auth.uid());
+  delete from public.jobs where owner_id = auth.uid();
+  delete from public.profiles where id = auth.uid();
+  delete from auth.users where id = auth.uid();
+end $$;
+revoke all on function public.delete_my_account() from public, anon;
+grant execute on function public.delete_my_account() to authenticated;

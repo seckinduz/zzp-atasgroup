@@ -16,16 +16,17 @@
   function unpackBio(bio) {
     var m = META_RE.exec(bio || ''), meta = {};
     if (m) { try { meta = m[1].charAt(0) === '{' ? JSON.parse(m[1]) : (function () { var o = {}; m[1].split(',').forEach(function (k) { if (k) o[k] = true; }); return o; })(); } catch (e) { meta = {}; } }
-    return { bio: (bio || '').replace(META_RE, ''), badges: { vca: !!meta.vca, avb: !!meta.avb, dba: !!meta.dba }, extra: { btw: meta.btw || '', sub: meta.sub || '', pc: meta.pc || '' } };
+    return { bio: (bio || '').replace(META_RE, ''), badges: { vca: !!meta.vca, avb: !!meta.avb, dba: !!meta.dba }, extra: { btw: meta.btw || '', sub: meta.sub || '', pc: meta.pc || '', done: meta.done || '', certs: meta.certs || [], ref: meta.ref || '' } };
   }
   function packBio(text, b, extra) {
     var meta = {}; b = b || {}; extra = extra || {};
     ['vca', 'avb', 'dba'].forEach(function (k) { if (b[k]) meta[k] = true; });
     if (extra.btw) meta.btw = extra.btw; if (extra.sub) meta.sub = extra.sub; if (extra.pc) meta.pc = extra.pc;
+    if (extra.done) meta.done = extra.done; if (extra.certs && extra.certs.length) meta.certs = extra.certs; if (extra.ref) meta.ref = String(extra.ref).slice(0, 200);
     return (text || '').trim() + (Object.keys(meta).length ? '\n\n[[meta:' + JSON.stringify(meta) + ']]' : '');
   }
   function shapeProfile(p) { if (!p) return p; var u = unpackBio(p.bio); return Object.assign({}, p, { bio: u.bio, badges: u.badges, extra: u.extra }); }
-  var pubProfile = function (p) { return p ? { id: p.id, role: p.role, full_name: p.full_name, company_name: p.company_name, kvk_number: p.kvk_number, bio: p.bio, badges: p.badges } : null; };
+  var pubProfile = function (p) { return p ? { id: p.id, role: p.role, full_name: p.full_name, company_name: p.company_name, kvk_number: p.kvk_number, bio: p.bio, badges: p.badges, extra: p.extra, region: p.region, category: p.category, hourly_rate: p.hourly_rate } : null; };
 
   function checkProfile(p) {
     if (['opdrachtgever', 'zzp'].indexOf(p.role) < 0) fail('Kies een type account.');
@@ -112,6 +113,8 @@
       if (!d.jobs.some(function (j) { return j.id === a.job_id && j.owner_id === m.user.id; })) fail('Geen toegang.');
       if ('status' in patch) a.status = patch.status; save(d); return Promise.resolve(a);
     },
+    exportData: function () { var d = load(), m = lNeed(d), id = m.user.id; return Promise.resolve({ exported_at: new Date().toISOString(), account: { id: id, email: m.user.email }, profile: m.profile, jobs: d.jobs.filter(function (j) { return j.owner_id === id; }), applications: d.applications.filter(function (a) { return a.applicant_id === id; }) }); },
+    deleteAccount: function () { var d = load(), m = lNeed(d), id = m.user.id; var mine = d.jobs.filter(function (j) { return j.owner_id === id; }).map(function (j) { return j.id; }); d.applications = d.applications.filter(function (a) { return a.applicant_id !== id && mine.indexOf(a.job_id) < 0; }); d.jobs = d.jobs.filter(function (j) { return j.owner_id !== id; }); d.profiles = d.profiles.filter(function (p) { return p.id !== id; }); d.users = d.users.filter(function (u) { return u.id !== id; }); save(d); localStorage.removeItem(LS); return Promise.resolve(); },
     session: function () { var m = lMe(load()); return Promise.resolve(m ? { user: { id: m.user.id, email: m.user.email, user_metadata: {} } } : null); },
     rawProfile: function () { var m = lMe(load()); return Promise.resolve(m ? m.profile : null); },
     saveProfile: function () { return Promise.reject(new Error('Profiel bewaren via Google werkt alleen met Supabase.')); },
@@ -154,7 +157,7 @@
   var uniq = function (a) { return a.filter(function (x, i) { return x && a.indexOf(x) === i; }); };
   function profilesFor(ids) {
     ids = uniq(ids); if (!ids.length) return Promise.resolve({});
-    return req('/rest/v1/profiles?id=in.' + encodeURIComponent(inList(ids)) + '&select=id,role,full_name,company_name,kvk_number,bio').then(function (r) { var m = {}; (r || []).forEach(function (p) { m[p.id] = pubProfile(shapeProfile(p)); }); return m; });
+    return req('/rest/v1/profiles?id=in.' + encodeURIComponent(inList(ids)) + '&select=id,role,full_name,company_name,kvk_number,bio,region,category,hourly_rate').then(function (r) { var m = {}; (r || []).forEach(function (p) { m[p.id] = pubProfile(shapeProfile(p)); }); return m; });
   }
   // maakt na de eerste login het profiel aan op basis van de registratiegegevens (nodig bij e-mailbevestiging)
   function ensureProfile(user) {
@@ -237,6 +240,19 @@
     if (!x.category || !x.region) fail('Kies een categorie en een regio.');
     var b = { id: id, role: x.role, full_name: x.full_name.trim(), company_name: x.company_name.trim(), kvk_number: x.kvk_number, category: x.category, region: x.region, hourly_rate: x.role === 'zzp' ? num(x.hourly_rate) : null };
     return req('/rest/v1/profiles?on_conflict=id', { method: 'POST', body: b, prefer: 'resolution=merge-duplicates,return=representation' }).then(function (r) { return shapeProfile(r[0]); });
+  };
+  sb.exportData = function () {
+    var id = uid(); if (!id) fail('Log eerst in.');
+    return Promise.all([req('/rest/v1/profiles?id=eq.' + id + '&select=*'), req('/rest/v1/jobs?owner_id=eq.' + id + '&select=*'), req('/rest/v1/applications?applicant_id=eq.' + id + '&select=*')]).then(function (r) {
+      return { exported_at: new Date().toISOString(), account: { id: id, email: tok().user.email }, profile: r[0] && r[0][0] ? shapeProfile(r[0][0]) : null, jobs: r[1] || [], applications: r[2] || [] };
+    });
+  };
+  // verwijdert het account via de database-functie delete_my_account (supabase/setup.sql); zonder die functie worden profiel, klussen en reacties gewist
+  sb.deleteAccount = function () {
+    var id = uid(); if (!id) fail('Log eerst in.');
+    return req('/rest/v1/rpc/delete_my_account', { method: 'POST', body: {} }).catch(function () {
+      return req('/rest/v1/applications?applicant_id=eq.' + id, { method: 'DELETE' }).then(function () { return req('/rest/v1/jobs?owner_id=eq.' + id, { method: 'DELETE' }); }).then(function () { return req('/rest/v1/profiles?id=eq.' + id, { method: 'DELETE' }); });
+    }).then(function () { setTok(null); });
   };
   sb.googleSignIn = function () {
     return fetch(base + '/auth/v1/settings', { headers: { apikey: C.supabaseKey } }).then(function (r) { return r.json(); }).catch(function () { return null; }).then(function (s) {

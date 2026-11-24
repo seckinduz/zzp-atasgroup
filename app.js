@@ -46,7 +46,40 @@
     if (j.rate_type === 'uur' && j.rate_value != null) o.baseSalary = { '@type': 'MonetaryAmount', currency: 'EUR', value: { '@type': 'QuantitativeValue', value: Number(j.rate_value), unitText: 'HOUR' } };
     return o;
   }
-  window.ZUI = { h: h, eur: eur, datum: datum, badge: badge, trust: trust, loadWerk: loadWerk, $: $, rateTxt: rateTxt, naam: naam, REMOTE_REGIO: REMOTE_REGIO };
+
+  // Specialisaties & referenties (aantal opdrachten, certificaten, referentienotitie), zelf verklaard
+  function spec(p) {
+    var x = (p && p.extra) || {}, certs = x.certs || [], n = parseInt(x.done, 10) || 0;
+    if (!n && !certs.length && !x.ref) return null;
+    var w = h('div', { class: 'spec' });
+    if (n) w.appendChild(h('span', { class: 'tchip v', title: 'Zelf opgegeven door het lid' }, h('span', { class: 'coin', 'aria-hidden': 'true' }, '★'), n + ' opdrachten voltooid'));
+    certs.forEach(function (c) { w.appendChild(h('span', { class: 'tchip p', title: 'Zelf verklaard door het lid' }, h('span', { class: 'coin', 'aria-hidden': 'true' }, '✓'), c)); });
+    if (x.ref) w.appendChild(h('p', { class: 'refnote', text: '“' + x.ref + '”' }));
+    return w;
+  }
+
+  // BTW 21% & netto-indicatie voor ZZP'ers (index en dashboard)
+  function nettoCalc(box, opts) {
+    opts = opts || {};
+    var out = h('div', { 'aria-live': 'polite' });
+    var f = h('form', { class: 'formbox', novalidate: 'novalidate', onsubmit: function (e) { e.preventDefault(); } },
+      h('div', { class: 'row2' }, h('label', null, 'Soort bedrag', h('select', { name: 'soort' }, h('option', { value: 'uur', text: 'Uurtarief' }), h('option', { value: 'project', text: 'Projectprijs' }))), h('label', null, 'Bedrag excl. btw (€)', h('input', { name: 'bedrag', type: 'number', min: '0', step: '5', value: '65', inputmode: 'decimal' }))),
+      h('div', { class: 'row2' }, h('label', null, 'Aantal uren (bij uurtarief)', h('input', { name: 'uren', type: 'number', min: '0', step: '1', value: '40', inputmode: 'numeric' })), h('label', null, 'Geschatte kosten (€)', h('input', { name: 'kosten', type: 'number', min: '0', step: '10', value: '300', inputmode: 'decimal' }))),
+      h('div', { class: 'row2' }, h('label', null, 'Belastingreserve over winst (%)', h('input', { name: 'bel', type: 'number', min: '0', max: '60', step: '1', value: '25', inputmode: 'numeric' })), h('label', null, 'Zelfstandigenaftrek (€, actueel bedrag zelf invullen)', h('input', { name: 'aftrek', type: 'number', min: '0', step: '10', value: '0', inputmode: 'decimal' }))));
+    function run() {
+      var q = f.elements, g = function (n) { var v = parseFloat(String(q[n].value).replace(',', '.')); return isNaN(v) ? 0 : v; };
+      var omzet = q.soort.value === 'uur' ? g('bedrag') * g('uren') : g('bedrag'), btw = omzet * 0.21, incl = omzet + btw, winst = Math.max(0, omzet - g('kosten'));
+      // indicatie: zelfstandigenaftrek (door u in te vullen) en MKB-winstvrijstelling 12,72% verlagen de belastbare winst, over de winst van dit bedrag als jaarwinst
+      var belastbaar = winst > 0 ? Math.max(0, winst - g('aftrek')) * (1 - 0.1272) : 0, reserve = belastbaar * Math.min(60, Math.max(0, g('bel'))) / 100, netto = winst - reserve;
+      out.textContent = '';
+      if (omzet <= 0) { out.appendChild(h('p', { class: 'note', text: 'Vul een bedrag in.' })); return; }
+      out.appendChild(h('div', { class: 'budget' }, h('small', { text: 'Netto-indicatie na kosten en belastingreserve' }), h('span', { class: 'big' }, h('em', { text: eur2(netto) })),
+        h('ul', null, h('li', { text: 'Omzet excl. btw: ' + eur2(omzet) }), h('li', { text: 'BTW 21%: ' + eur2(btw) + ' (afdragen aan de Belastingdienst)' }), h('li', { text: 'Factuurbedrag incl. btw: ' + eur2(incl) }), h('li', { text: 'Winst voor belasting: ' + eur2(winst) }), h('li', { text: 'Belastingreserve: ' + eur2(reserve) })),
+        h('small', { text: 'Indicatie op basis van de ingevulde gegevens; geen belasting- of boekhoudadvies.' })));
+    }
+    f.addEventListener('input', run); box.appendChild(f); box.appendChild(out); run();
+  }
+  window.ZUI = { h: h, eur: eur, datum: datum, badge: badge, trust: trust, spec: spec, nettoCalc: nettoCalc, loadWerk: loadWerk, $: $, rateTxt: rateTxt, naam: naam, REMOTE_REGIO: REMOTE_REGIO };
 
   /* ---------------- gebruikersmenu (avatar) ---------------- */
   var initials = function (n) { return (n || '?').trim().split(/\s+/).slice(0, 2).map(function (x) { return x.charAt(0).toUpperCase(); }).join(''); };
@@ -76,6 +109,17 @@
   }
   userMenu();
   window.addEventListener('storage', function (e) { if (e.key === 'zzp_sb' || e.key === 'zzp_demo_session') userMenu(); });
+
+
+  /* ---------------- Cookie- & privacymelding (AVG): alleen functionele opslag, eenmaal sluiten ---------------- */
+  (function () {
+    try { if (localStorage.getItem('zzp_cookie_ok')) return; } catch (e) { }
+    var bar = h('div', { class: 'cookiebar', role: 'region', 'aria-label': 'Cookie- en privacymelding' },
+      h('p', null, 'Wij gebruiken alleen functionele opslag (inloggen en uw concept) en plaatsen geen tracking- of advertentiecookies. ', h('a', { href: 'privacy.html', text: 'Privacyverklaring (AVG)' }), '.'),
+      h('button', { type: 'button', class: 'btn pill', text: 'Begrepen', onclick: function () { try { localStorage.setItem('zzp_cookie_ok', '1'); } catch (e) { } bar.remove(); } }));
+    document.body.appendChild(bar);
+  })();
+  (function () { var nb = $('netto-calc'); if (nb) nettoCalc(nb); })();
 
   var page = document.body.getAttribute('data-page');
   var matchRegio = function (sel, r) { return !sel || r === sel || r === REMOTE_REGIO; };

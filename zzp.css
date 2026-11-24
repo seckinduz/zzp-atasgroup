@@ -333,3 +333,18 @@ a.job.ex,.job.ex{cursor:default}
 
 .prijst{width:100%;border-collapse:collapse;margin:8px 0;background:#fff;border:1.5px solid rgba(17,24,39,.14);border-radius:14px;overflow:hidden}.prijst th,.prijst td{padding:12px 14px;text-align:left;border-bottom:1px solid rgba(17,24,39,.1)}.prijst th{background:#F8FAFC;font-size:.85rem}
 .strip .coin{display:grid;place-items:center;border-radius:50%;background:#F36F21;color:#111827;font-weight:800;flex:none}.hero-zzp .cta,.seo .cta{justify-content:flex-start}
+
+/* v13: cookiemelding, specialisaties, offertevergelijking, polijst */
+.cookiebar{position:fixed;left:12px;right:12px;bottom:12px;z-index:90;max-width:760px;margin-inline:auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 18px;background:#111827;color:#fff;border-radius:18px;box-shadow:0 18px 40px -16px rgba(17,24,39,.6);font-size:.88rem;line-height:1.45}
+.cookiebar p{flex:1 1 260px;min-width:0}.cookiebar a{color:#fff;text-decoration:underline;text-decoration-color:#F36F21;text-underline-offset:3px}.cookiebar .btn{min-height:44px;padding:8px 20px;flex:none}
+body:has(.qbar) .cookiebar{bottom:76px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.spec{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.spec .refnote{flex-basis:100%;font-size:.88rem;color:var(--mute);font-style:italic;overflow-wrap:anywhere}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;border-radius:14px}
+.vgl{min-width:560px;font-size:.88rem}.vgl th[scope=row]{font-weight:700}.vgl tr.best td,.vgl tr.best th{background:rgba(243,111,33,.1)}
+.btn.danger,.mini.danger{border-color:#B91C1C;color:#B91C1C}.btn.danger:hover{background:#B91C1C;color:#fff}
+.dcard,.job,.app,.formbox,.budget{overflow-wrap:anywhere;min-width:0}
+.dcard .cta .btn,.app .cta .btn{white-space:normal;text-align:center}
+.pillrow .check{margin-right:10px}
+.dmain,.dash,.tgrid{min-width:0;max-width:100%}
+@media(max-width:600px){.cookiebar{left:8px;right:8px;padding:12px 14px}}

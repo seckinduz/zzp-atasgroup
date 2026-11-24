@@ -84,16 +84,16 @@ PAGE = """<!doctype html>
 <meta name="description" content="{beschr}">
 <link rel="canonical" href="{url}"><link rel="icon" type="image/svg+xml" href="../favicon.svg"><meta name="robots" content="index, follow"><meta name="theme-color" content="#ffffff">
 <meta property="og:type" content="article"><meta property="og:locale" content="nl_NL"><meta property="og:title" content="{titel} in {regio}"><meta property="og:url" content="{url}">
-<link rel="stylesheet" href="../style.css?v=12"><link rel="stylesheet" href="../zzp.css?v=12">
+<link rel="stylesheet" href="../style.css?v=13"><link rel="stylesheet" href="../zzp.css?v=13">
 <script type="application/ld+json">{ld}</script></head>
 <body><div class="glow" aria-hidden="true"><i></i><i></i><i></i></div>
-<header class="site"><div class="wrap hz"><a class="logo" href="../index.html"><img src="../logo-zzp.svg?v=12" alt="ATAS ZZP" width="190" height="34"></a><nav class="hnav"><a class="btn pill" href="../plaatsen.html">Klus plaatsen</a></nav></div></header>
+<header class="site"><div class="wrap hz"><a class="logo" href="../index.html"><img src="../logo-zzp.svg?v=13" alt="ATAS ZZP" width="190" height="34"></a><nav class="hnav"><a class="btn pill" href="../plaatsen.html">Klus plaatsen</a></nav></div></header>
 <main><div class="wrap narrow" style="padding-top:calc(var(--hh) + 14px);padding-bottom:70px"><a class="back" href="../index.html#resultaten">&larr; Alle klussen</a>
 <div class="article"><div class="jt"><h1>{titel}</h1><span class="kvkbadge v"><span class="coin">&#10003;</span><span>KvK Gecontroleerd</span></span></div>
 <dl><dt>Opdrachtgever</dt><dd>{bedrijf}</dd><dt>KvK-nummer</dt><dd>{kvk}</dd><dt>Categorie</dt><dd>{categorie}</dd><dt>Soort klus</dt><dd>{subklus}</dd><dt>Regio</dt><dd>{regio}</dd><dt>Omvang en duur</dt><dd>{duur}</dd><dt>Tarief</dt><dd>{tarief}</dd></dl>
 <div class="desc">{desc}</div>
 <p style="margin-top:18px"><a class="btn pill" href="../ilan.html?id={id}">Reageer op deze klus</a></p></div></div></main>
-<footer class="site"><div class="wrap"><nav class="fnav"><a href="../voorwaarden.html">Algemene voorwaarden</a><a href="../privacy.html">Privacy (AVG)</a></nav><p>ATAS ZZP Netwerk · <a href="https://atasgroup.nl">Atas Group</a> · Emmen, Nederland · <a href="mailto:info@atasgroup.nl">info@atasgroup.nl</a></p></div></footer></body></html>
+<footer class="site"><div class="wrap"><nav class="fnav"><a href="../voorwaarden.html">Algemene voorwaarden</a><a href="../privacy.html">Privacy (AVG)</a></nav><p>ATAS ZZP Netwerk · <a href="https://atasgroup.nl">Atas Group</a> · Emmen, Nederland · <a href="mailto:info@atasgroup.nl">info@atasgroup.nl</a> · KvK: In voorbereiding / Aanvraag loopt</p></div></footer></body></html>
 """
 
 if __name__ == "__main__":

@@ -6,7 +6,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 SITE = "https://zzp.atasgroup.nl"
-V = "12"
+V = "13"
 e = html.escape
 
 # ---------------------------------------------------------------- regio's
@@ -218,8 +218,8 @@ HEAD = """<!doctype html>
 """
 FOOT = """</div></main>
 <footer class="site"><div class="wrap"><img class="flogo" src="logo-zzp.svg?v={v}" alt="ATAS ZZP" width="150" height="30">
-<nav class="fnav" aria-label="Informatie"><a href="werkwijze.html">Hoe het werkt</a><a href="regios.html">Werkgebied</a><a href="wet-dba-kvk.html">Wet DBA &amp; KvK Zekerheid</a><a href="voorwaarden.html">Algemene voorwaarden</a><a href="privacy.html">Privacy (AVG)</a><a href="plaatsen.html">Klus plaatsen</a></nav>
-<p>ATAS ZZP Netwerk · <a href="https://atasgroup.nl">Atas Group</a> · Emmen, Nederland · <a href="mailto:info@atasgroup.nl">info@atasgroup.nl</a></p></div></footer>
+<nav class="fnav" aria-label="Informatie"><a href="werkwijze.html">Hoe het werkt</a><a href="regios.html">Werkgebied</a><a href="wet-dba-kvk.html">Wet DBA &amp; KvK Zekerheid</a><a href="voorwaarden.html">Algemene voorwaarden</a><a href="privacy.html">Privacyverklaring (AVG)</a><a href="wet-dba-kvk.html#richtlijnen">Wet DBA Richtlijnen</a><a href="plaatsen.html">Klus plaatsen</a></nav>
+<p>ATAS ZZP Netwerk · <a href="https://atasgroup.nl">Atas Group</a> · Emmen, Nederland · <a href="mailto:info@atasgroup.nl">info@atasgroup.nl</a> · KvK: In voorbereiding / Aanvraag loopt</p></div></footer>
 <script src="config.js"></script><script src="db.js?v={v}"></script><script src="geo.js?v={v}"></script><script src="app.js?v={v}"></script></body></html>
 """
 
