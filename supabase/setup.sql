@@ -24,6 +24,7 @@ grant usage on schema public to anon, authenticated;
 grant select on public.profiles, public.jobs to anon, authenticated;
 grant insert, update on public.profiles, public.jobs to authenticated;
 grant select, insert on public.applications to authenticated;
+grant update (status) on public.applications to authenticated;
 
 -- profiles: openbaar leesbaar (ZZP-overzicht, KvK-label); iedereen beheert alleen zijn eigen profiel
 drop policy if exists profiles_select on public.profiles;
@@ -51,3 +52,9 @@ create policy applications_insert on public.applications for insert to authentic
   applicant_id = auth.uid()
   and exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'zzp')
   and exists (select 1 from public.jobs j where j.id = job_id and j.status = 'open'));
+
+-- opdrachtgever mag de status van aanmeldingen op eigen klussen wijzigen (Accepteren)
+drop policy if exists applications_update on public.applications;
+create policy applications_update on public.applications for update to authenticated
+  using (exists (select 1 from public.jobs j where j.id = job_id and j.owner_id = auth.uid()))
+  with check (exists (select 1 from public.jobs j where j.id = job_id and j.owner_id = auth.uid()));

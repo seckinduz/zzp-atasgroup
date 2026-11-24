@@ -11,17 +11,20 @@
   var fail = function (m) { throw new Error(m); };
   var num = function (x) { return x === '' || x == null || isNaN(Number(x)) ? null : Number(x); };
 
-  /* vinkjes VCA / AVB / Modelovereenkomst worden onzichtbaar in het bio-veld bewaard: [[badges:vca,avb,dba]] */
+  /* extra profielvelden die niet als kolom bestaan (VCA, AVB, Wet DBA, BTW-nummer, subcategorie, postcode) staan onzichtbaar achter de bio: [[meta:{...}]] */
+  var META_RE = /\n*\[\[(?:meta|badges):([\s\S]*?)\]\]\s*$/;
   function unpackBio(bio) {
-    var m = /\n*\[\[badges:([a-z,]*)\]\]\s*$/.exec(bio || ''), b = { vca: false, avb: false, dba: false };
-    if (m) m[1].split(',').forEach(function (k) { if (k in b) b[k] = true; });
-    return { bio: (bio || '').replace(/\n*\[\[badges:[a-z,]*\]\]\s*$/, ''), badges: b };
+    var m = META_RE.exec(bio || ''), meta = {};
+    if (m) { try { meta = m[1].charAt(0) === '{' ? JSON.parse(m[1]) : (function () { var o = {}; m[1].split(',').forEach(function (k) { if (k) o[k] = true; }); return o; })(); } catch (e) { meta = {}; } }
+    return { bio: (bio || '').replace(META_RE, ''), badges: { vca: !!meta.vca, avb: !!meta.avb, dba: !!meta.dba }, extra: { btw: meta.btw || '', sub: meta.sub || '', pc: meta.pc || '' } };
   }
-  function packBio(text, b) {
-    var k = ['vca', 'avb', 'dba'].filter(function (x) { return b && b[x]; });
-    return (text || '').trim() + (k.length ? '\n\n[[badges:' + k.join(',') + ']]' : '');
+  function packBio(text, b, extra) {
+    var meta = {}; b = b || {}; extra = extra || {};
+    ['vca', 'avb', 'dba'].forEach(function (k) { if (b[k]) meta[k] = true; });
+    if (extra.btw) meta.btw = extra.btw; if (extra.sub) meta.sub = extra.sub; if (extra.pc) meta.pc = extra.pc;
+    return (text || '').trim() + (Object.keys(meta).length ? '\n\n[[meta:' + JSON.stringify(meta) + ']]' : '');
   }
-  function shapeProfile(p) { if (!p) return p; var u = unpackBio(p.bio); return Object.assign({}, p, { bio: u.bio, badges: u.badges }); }
+  function shapeProfile(p) { if (!p) return p; var u = unpackBio(p.bio); return Object.assign({}, p, { bio: u.bio, badges: u.badges, extra: u.extra }); }
   var pubProfile = function (p) { return p ? { id: p.id, role: p.role, full_name: p.full_name, company_name: p.company_name, kvk_number: p.kvk_number, bio: p.bio, badges: p.badges } : null; };
 
   function checkProfile(p) {
@@ -38,7 +41,7 @@
   }
   var profFields = function (x) {
     return { role: x.role, full_name: x.full_name.trim(), company_name: x.company_name.trim(), kvk_number: x.kvk_number, category: x.category || null, region: x.region || null,
-      hourly_rate: num(x.hourly_rate), bio: packBio(x.bio, x.badges) };
+      hourly_rate: num(x.hourly_rate), bio: packBio(x.bio, x.badges, x.extra) };
   };
   var jobFields = function (j) {
     return { title: j.title.trim(), category: j.category, subcategory: j.subcategory, region: j.region, rate_type: j.rate_type || 'project', rate_value: num(j.rate_value),
@@ -104,6 +107,11 @@
       d.applications.push(n); save(d); return Promise.resolve(n);
     },
     myApplications: function () { var d = load(), m = lNeed(d); return Promise.resolve(d.applications.filter(function (a) { return a.applicant_id === m.user.id; }).map(function (a) { return Object.assign({}, a, { jobs: d.jobs.filter(function (j) { return j.id === a.job_id; })[0] || null }); })); },
+    updateApplication: function (id, patch) {
+      var d = load(), m = lNeed(d), a = d.applications.filter(function (x) { return x.id === id; })[0]; if (!a) fail('Aanmelding niet gevonden.');
+      if (!d.jobs.some(function (j) { return j.id === a.job_id && j.owner_id === m.user.id; })) fail('Geen toegang.');
+      if ('status' in patch) a.status = patch.status; save(d); return Promise.resolve(a);
+    },
     session: function () { var m = lMe(load()); return Promise.resolve(m ? { user: { id: m.user.id, email: m.user.email, user_metadata: {} } } : null); },
     rawProfile: function () { var m = lMe(load()); return Promise.resolve(m ? m.profile : null); },
     saveProfile: function () { return Promise.reject(new Error('Profiel bewaren via Google werkt alleen met Supabase.')); },
@@ -158,6 +166,7 @@
     });
   }
   var sb = {
+    updateApplication: function (id, patch) { return req('/rest/v1/applications?id=eq.' + id, { method: 'PATCH', body: { status: patch.status } }).then(function (r) { if (!r || !r.length) fail('Wijzigen is niet toegestaan of mislukt.'); return r[0]; }); },
     signUp: function (x) {
       checkProfile(x);
       var f = profFields(x);
@@ -175,7 +184,7 @@
     me: function () { var id = uid(); if (!id) return Promise.resolve(null); return req('/rest/v1/profiles?id=eq.' + id + '&select=*').then(function (r) { return r && r[0] ? { user: { id: id, email: tok().user.email }, profile: shapeProfile(r[0]) } : null; }).catch(function () { return null; }); },
     updateProfile: function (patch) {
       if (patch.kvk_number != null && !kvkGeldig(patch.kvk_number)) fail('Een geldig KvK-nummer van precies 8 cijfers is verplicht.');
-      return sb.me().then(function (m) { if (!m) fail('Log eerst in.'); var n = Object.assign({}, m.profile, patch), f = profFields(n); delete f.role; return req('/rest/v1/profiles?id=eq.' + uid(), { method: 'PATCH', body: f }).then(function (r) { return shapeProfile(r[0]); }); });
+      return sb.me().then(function (m) { if (!m) fail('Log eerst in.'); var n = Object.assign({}, m.profile, patch), f = profFields(n); if (!patch.role) delete f.role; return req('/rest/v1/profiles?id=eq.' + uid(), { method: 'PATCH', body: f }).then(function (r) { return shapeProfile(r[0]); }); });
     },
     listJobs: function () {
       return req('/rest/v1/jobs?status=eq.open&select=*&limit=500').then(function (jobs) {
