@@ -1,0 +1,17 @@
+name: ilan-pagina's en sitemap
+on:
+  schedule: [{ cron: '*/30 * * * *' }]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python build_sitemap.py
+      - run: |
+          git config user.name "atas-zzp-bot"
+          git config user.email "sales@atasgroup.nl"
+          git add -A
+          git diff --cached --quiet || (git commit -m "Advertenties en sitemap bijgewerkt" && git push)
