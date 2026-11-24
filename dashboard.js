@@ -257,7 +257,7 @@
       h('div', { class: 'dcard' }, h('h3', { text: '100 m² budget & werkplan' }), h('div', { class: 'fgrid' }, h('label', null, 'Categorie', cat), h('label', null, 'Soort klus', sub), h('label', null, 'Oppervlak (m²) of uren', n), h('label', { class: 'check' }, mat, 'Materiaal inclusief')), out,
         h('div', { class: 'cta' }, h('a', { class: 'btn pill', href: 'plaatsen.html', text: 'Volledige wizard' }), draft ? h('a', { class: 'btn ghost', href: 'werkplan.html?draft=1', text: 'Werkplan (PDF) van uw concept' }) : null)),
       h('div', { class: 'dcard' }, h('h3', { text: 'ZZP Uurtarief Calculator' }), h('p', { class: 'hint', text: 'Bereken uw uurtarief uit netto doelinkomen, kosten, verzekeringen, vakantie en belastingreserve.' }), h('a', { class: 'btn pill', href: 'index.html#calculator', text: 'Open de calculator' })),
-      (function () { var c = h('div', { class: 'dcard' }, h('h3', { text: 'BTW & Netto Kazanç Calculator' }), h('p', { class: 'hint', text: '21% btw, kosten en netto-indicatie van uw uurtarief of projectprijs.' })); var b = h('div', { class: 'fgrid' }); c.appendChild(b); U.nettoCalc(b); return c; })(),
+      (function () { var c = h('div', { class: 'dcard' }, h('h3', { text: 'BTW & Netto Inkomsten Calculator' }), h('p', { class: 'hint', text: '21% btw, kosten en netto-indicatie van uw uurtarief of projectprijs.' })); var b = h('div', { class: 'fgrid' }); c.appendChild(b); U.nettoCalc(b); return c; })(),
       h('div', { class: 'dcard' }, h('h3', { text: 'Wet DBA & KvK' }), h('p', { class: 'hint', text: 'Lees hoe KvK, VCA, AVB en de Modelovereenkomst werken.' }), h('a', { class: 'btn ghost', href: 'wet-dba-kvk.html', text: 'Lees meer' }))));
   }
 })();
