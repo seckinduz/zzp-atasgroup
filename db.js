@@ -103,7 +103,11 @@
       var n = { id: newId(), job_id: job_id, applicant_id: m.user.id, proposed_rate: num(x.proposed_rate), message: x.message.trim() + (x.email ? '\n\nContact: ' + x.email : ''), status: 'pending', created_at: new Date().toISOString() };
       d.applications.push(n); save(d); return Promise.resolve(n);
     },
-    myApplications: function () { var d = load(), m = lNeed(d); return Promise.resolve(d.applications.filter(function (a) { return a.applicant_id === m.user.id; }).map(function (a) { return Object.assign({}, a, { jobs: d.jobs.filter(function (j) { return j.id === a.job_id; })[0] || null }); })); }
+    myApplications: function () { var d = load(), m = lNeed(d); return Promise.resolve(d.applications.filter(function (a) { return a.applicant_id === m.user.id; }).map(function (a) { return Object.assign({}, a, { jobs: d.jobs.filter(function (j) { return j.id === a.job_id; })[0] || null }); })); },
+    session: function () { var m = lMe(load()); return Promise.resolve(m ? { user: { id: m.user.id, email: m.user.email, user_metadata: {} } } : null); },
+    rawProfile: function () { var m = lMe(load()); return Promise.resolve(m ? m.profile : null); },
+    saveProfile: function () { return Promise.reject(new Error('Profiel bewaren via Google werkt alleen met Supabase.')); },
+    googleSignIn: function () { return Promise.reject(new Error('Inloggen met Google werkt alleen met Supabase (zet demo uit in config.js).')); }
   };
 
   /* ---------------- SUPABASE ---------------- */
@@ -211,5 +215,36 @@
     }
   };
 
-  window.ZZP = Object.assign({ mode: REMOTE ? 'supabase' : 'demo', kvkGeldig: kvkGeldig, packBio: packBio }, REMOTE ? sb : demo);
+  /* Google OAuth: terugkeer via #access_token (implicit flow), daarna profiel controleren/aanvullen */
+  var ready = Promise.resolve(), oauthError = '';
+  sb.session = function () { var t = tok(); return Promise.resolve(t && t.user ? { user: t.user } : null); };
+  sb.rawProfile = function () { var id = uid(); if (!id) return Promise.resolve(null); return req('/rest/v1/profiles?id=eq.' + id + '&select=*').then(function (r) { return r && r[0] ? shapeProfile(r[0]) : null; }); };
+  sb.saveProfile = function (x) {
+    var id = uid(); if (!id) fail('Log eerst in.');
+    if (['opdrachtgever', 'zzp'].indexOf(x.role) < 0) fail('Kies of u ZZP\'er of opdrachtgever bent.');
+    if (!x.full_name || x.full_name.trim().length < 2) fail('Vul uw naam in.');
+    if (!x.company_name || x.company_name.trim().length < 2) fail('Vul uw bedrijfsnaam in.');
+    if (!kvkGeldig(x.kvk_number)) fail('Een geldig KvK-nummer van precies 8 cijfers is verplicht.');
+    if (!x.category || !x.region) fail('Kies een categorie en een regio.');
+    var b = { id: id, role: x.role, full_name: x.full_name.trim(), company_name: x.company_name.trim(), kvk_number: x.kvk_number, category: x.category, region: x.region, hourly_rate: x.role === 'zzp' ? num(x.hourly_rate) : null };
+    return req('/rest/v1/profiles?on_conflict=id', { method: 'POST', body: b, prefer: 'resolution=merge-duplicates,return=representation' }).then(function (r) { return shapeProfile(r[0]); });
+  };
+  sb.googleSignIn = function () {
+    return fetch(base + '/auth/v1/settings', { headers: { apikey: C.supabaseKey } }).then(function (r) { return r.json(); }).catch(function () { return null; }).then(function (s) {
+      if (s && s.external && s.external.google === false) fail('Inloggen met Google is nog niet ingeschakeld. Het beheer moet de Google-provider aanzetten in Supabase.');
+      var to = location.hostname === 'zzp.atasgroup.nl' ? 'https://zzp.atasgroup.nl' : location.origin + '/';
+      location.href = base + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent(to);
+    });
+  };
+  if (REMOTE && /access_token=|error=/.test(location.hash || '')) {
+    var hp = new URLSearchParams(location.hash.replace(/^#/, ''));
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
+    if (hp.get('error')) oauthError = hp.get('error_description') || hp.get('error');
+    else if (hp.get('access_token')) ready = fetch(base + '/auth/v1/user', { headers: { apikey: C.supabaseKey, Authorization: 'Bearer ' + hp.get('access_token') } })
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(function (u) { setTok({ access_token: hp.get('access_token'), refresh_token: hp.get('refresh_token'), user: u }); })
+      .catch(function () { oauthError = 'Inloggen met Google is mislukt. Probeer het opnieuw.'; });
+  }
+  if (REMOTE) Object.keys(sb).forEach(function (k) { var f = sb[k]; sb[k] = function () { var a = arguments; return ready.then(function () { return f.apply(null, a); }); }; });
+
+  window.ZZP = Object.assign({ mode: REMOTE ? 'supabase' : 'demo', kvkGeldig: kvkGeldig, packBio: packBio, takeOauthError: function () { var e = oauthError; oauthError = ''; return e; } }, REMOTE ? sb : demo);
 })();

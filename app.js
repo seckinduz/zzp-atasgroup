@@ -169,6 +169,10 @@
     function gast() {
       root.textContent = ''; var role = 'opdrachtgever', tab = 'login';
       var tabs = h('div', { class: 'tabs', role: 'tablist' }), body = h('div', { class: 'formbox' });
+      var gerr = h('p', { class: 'err', role: 'alert' });
+      root.appendChild(h('div', { class: 'formbox gbox' },
+        h('button', { type: 'button', class: 'gbtn', onclick: function () { gerr.textContent = ''; Z.googleSignIn().catch(function (e) { gerr.textContent = e.message; }); } }, h('img', { src: 'google-g.svg', alt: '', width: '20', height: '20' }), h('span', { text: 'Doorgaan met Google' })),
+        gerr, h('p', { class: 'hint divider', text: 'of ga verder met e-mail' })));
       loadWerk().then(function (W) {
         var cats = W.categorieen.map(function (c) { return c.naam; });
         function bouw() {
@@ -267,6 +271,45 @@
       laadLijst();
     }
     paneel();
+  }
+
+  /* ---------------- Profiel voltooien (niet te sluiten) ---------------- */
+  function profielModal(sess, raw) {
+    raw = raw || {}; var md = (sess.user && sess.user.user_metadata) || {}, role = raw.role || '', er = h('p', { class: 'err', role: 'alert' });
+    var ov = h('div', { class: 'mdl-ov' }), box = h('div', { class: 'mdl', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'mdl-t' });
+    var roleRow = h('div', { class: 'pillrow', role: 'group', 'aria-label': 'Ik ben' });
+    var rate = h('label', { hidden: role === 'zzp' ? false : 'hidden' }, 'Uurtarief (€ excl. btw)', h('input', { name: 'hourly_rate', type: 'number', min: '0', max: '1000', step: '1', inputmode: 'numeric', value: raw.hourly_rate != null ? raw.hourly_rate : '' }));
+    [['zzp', 'ZZP\'er'], ['opdrachtgever', 'Opdrachtgever']].forEach(function (r) {
+      roleRow.appendChild(h('button', { type: 'button', 'aria-pressed': role === r[0], text: r[1], onclick: function (e) { role = r[0]; Array.prototype.forEach.call(roleRow.children, function (b) { b.setAttribute('aria-pressed', b === e.target); }); rate.hidden = role !== 'zzp'; } }));
+    });
+    var f = h('form', { novalidate: 'novalidate' }, h('div', null, h('span', { class: 'hint', style: 'font-weight:700' }, 'Ik ben'), roleRow),
+      h('div', { class: 'row2' }, h('label', null, 'Naam', h('input', { name: 'full_name', value: raw.full_name || md.full_name || md.name || '', autocomplete: 'name', required: 'required' })), h('label', null, 'Bedrijfsnaam', h('input', { name: 'company_name', value: raw.company_name || '', autocomplete: 'organization', required: 'required' }))),
+      h('label', null, 'KvK-nummer (8 cijfers)', h('input', { name: 'kvk_number', value: raw.kvk_number || '', inputmode: 'numeric', maxlength: '8', placeholder: '12345678', required: 'required', autocomplete: 'off' })),
+      h('div', { class: 'row2' }, h('label', null, 'Categorie', h('select', { name: 'category', required: 'required' }, h('option', { value: '', text: 'Kies een categorie' }))), h('label', null, 'Regio', h('select', { name: 'region', required: 'required' }, h('option', { value: '', text: 'Kies een regio' })))),
+      rate, er, h('button', { class: 'btn pill', type: 'submit', text: 'Profiel opslaan en doorgaan' }));
+    loadWerk().then(function (W) {
+      W.categorieen.forEach(function (c) { f.elements.category.appendChild(h('option', { value: c.naam, text: c.naam })); }); W.regios.forEach(function (r) { f.elements.region.appendChild(h('option', { value: r, text: r })); });
+      f.elements.category.value = raw.category || ''; f.elements.region.value = raw.region || '';
+    });
+    f.addEventListener('submit', function (e) {
+      e.preventDefault(); er.textContent = ''; var q = f.elements, b = f.querySelector('button[type=submit]');
+      q.kvk_number.value = q.kvk_number.value.replace(/\s+/g, ''); b.disabled = true;
+      Z.saveProfile({ role: role, full_name: q.full_name.value, company_name: q.company_name.value, kvk_number: q.kvk_number.value, category: q.category.value, region: q.region.value, hourly_rate: q.hourly_rate ? q.hourly_rate.value : null })
+        .then(function () { document.body.classList.remove('lock'); ov.remove(); location.href = 'account.html'; })
+        .catch(function (x) { er.textContent = x.message; b.disabled = false; });
+    });
+    box.appendChild(h('h2', { id: 'mdl-t', text: 'Profiel voltooien' })); box.appendChild(h('p', { class: 'hint', text: 'Nog even uw gegevens aanvullen om verder te gaan. Een geldig KvK-nummer is verplicht.' })); box.appendChild(f);
+    ov.appendChild(box); document.body.appendChild(ov); document.body.classList.add('lock');
+    ov.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') e.preventDefault();
+      if (e.key === 'Tab') { var els = box.querySelectorAll('button,input,select,textarea,a[href]'), vis = Array.prototype.filter.call(els, function (x) { return !x.disabled && x.offsetParent !== null; }), first = vis[0], last = vis[vis.length - 1]; if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); } }
+    });
+    setTimeout(function () { var i = f.elements.full_name; if (i) i.focus(); }, 50);
+  }
+  function toast(t) { var n = h('p', { class: 'toastmsg', role: 'alert', text: t }); document.body.appendChild(n); setTimeout(function () { n.remove(); }, 9000); }
+  if (Z.mode === 'supabase') {
+    var oe = Z.takeOauthError && Z.takeOauthError(); if (oe) toast(oe);
+    Z.session().then(function (s) { if (!s) return; return Z.rawProfile().then(function (r) { if (!r || !r.role || !r.kvk_number) profielModal(s, r); }); }).catch(function () { });
   }
 
   var fn = { home: home, ilan: ilan, account: account }[page]; if (fn) fn();

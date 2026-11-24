@@ -227,3 +227,17 @@ details.faqd,#faq details{border:1.5px solid rgba(17,24,39,.14);border-radius:16
 .calcgrid{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-top:16px;align-items:start}
 @media(max-width:900px){.calcgrid{grid-template-columns:1fr}}
 #calc input{min-height:48px}
+
+/* Google-knop, profiel-voltooien-venster */
+.gbox{margin-bottom:14px;display:grid;gap:10px}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:52px;border:1.5px solid #747775;border-radius:99px;background:#fff;color:#1f1f1f;font:inherit;font-weight:600;font-size:1rem;cursor:pointer;padding:0 18px}
+.gbtn:hover{background:#f8f9fa;box-shadow:0 1px 3px rgba(60,64,67,.3)}
+.gbtn img{flex:none}
+.divider{text-align:center;position:relative}
+.mdl-ov{position:fixed;inset:0;z-index:300;background:rgba(17,24,39,.65);display:grid;place-items:center;padding:16px;overflow:auto}
+.mdl{background:#fff;border:2px solid #111827;border-radius:24px;width:min(100%,560px);max-height:calc(100dvh - 32px);overflow:auto;padding:clamp(16px,3vw,26px);box-shadow:0 30px 80px -30px rgba(0,0,0,.6)}
+.mdl h2{font-size:1.4rem;margin-bottom:4px;max-width:none}
+.mdl form{margin-top:12px}
+.mdl label[hidden]{display:none}
+body.lock{overflow:hidden}
+.toastmsg{position:fixed;left:16px;right:16px;bottom:16px;z-index:400;background:#111827;color:#fff;padding:12px 16px;border-radius:14px;text-align:center;font-weight:600}
